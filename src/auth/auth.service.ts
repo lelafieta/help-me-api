@@ -1,27 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private prisma: PrismaService,
+  ) {}
 
   async register(createAuthDto: CreateAuthDto) {
-    // In a real application, you would interact with Supabase here
-    // For now, we'll just simulate a user creation and return a token
-    const user = { username: createAuthDto.email, password: createAuthDto.password }; // Placeholder
-    const payload = { username: user.username, sub: user.username }; // Placeholder for user ID
+    
+    const { name, email, password, phone } = createAuthDto;
+    
+    
+  
+    const existingUser = await this.prisma.user.findUnique({ where: { email } });  
+
+    if (existingUser) {
+      throw new ConflictException('Email já está em uso');
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await this.prisma.user.create({
+      data: {                        
+        email,
+        name: name,
+        phone: phone,
+        password: hashedPassword,
+      },
+    });
+
+    const payload = { sub: user.id, email: user.email };
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
 
   async login(loginAuthDto: LoginAuthDto) {
-    // In a real application, you would interact with Supabase here to verify credentials
-    // For now, we'll just simulate a successful login and return a token
-    const user = { username: loginAuthDto.email, password: loginAuthDto.password }; // Placeholder
-    const payload = { username: user.username, sub: user.username }; // Placeholder for user ID
+    const { email, password } = loginAuthDto;
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    const isPasswordValid = await bcrypt.compare(loginAuthDto.password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    const payload = { sub: user.id, email: user.email };
     return {
       access_token: this.jwtService.sign(payload),
     };

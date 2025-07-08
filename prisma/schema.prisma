@@ -1,17 +1,353 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int            @id @default(autoincrement())
+  email            String?        @unique
+  phone            String?        @unique
+  name             String?
+  roleName         String?        @map("role")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime?      @updatedAt
+  emailConfirmedAt DateTime?
+  phoneConfirmedAt DateTime?
+  lastSignInAt     DateTime?
+  isSuperAdmin     Boolean?
+  password         String
+  notifications    Notification[]
+  ongsDocuments    OngsDocument[]
+  profiles         Profile?
+  userFcmTokens    UserFcmToken[]
+
+  @@map("users")
+}
+
+model Blog {
+  id          Int            @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  description String?
+  userId      Int? // REMOVIDO @db.Uuid
+  ongId       Int? // REMOVIDO @db.Uuid
+  title       String?
+  image       String?
+
+  ong     Ong?     @relation(fields: [ongId], references: [id])
+  profile Profile? @relation(fields: [userId], references: [id])
+
+  @@map("blogs")
+}
+
+model CampaignComment {
+  id          Int            @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  userId      Int?
+  campaignId  Int?
+  description String?
+  campaign    Campaign? @relation(fields: [campaignId], references: [id])
+  profile     Profile?  @relation(fields: [userId], references: [id])
+
+  @@map("campaign_comments")
+}
+
+model CampaignContributor {
+  id          Int            @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  campaignId  Int?
+  userId      Int?
+  money       Decimal?  @default(0) // removido @db.Decimal
+  isAnonymous Boolean?  @default(false)
+
+  campaign Campaign? @relation(fields: [campaignId], references: [id])
+  profile  Profile?  @relation(fields: [userId], references: [id])
+
+  @@map("campaign_contributors")
+}
+
+model CampaignDocument {
+  id           Int            @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  documentPath String?
+  updatedAt    DateTime? @updatedAt
+  campaignId   Int?
+  userId       Int?
+  isApproved   Boolean?  @default(false)
+  campaign     Campaign? @relation(fields: [campaignId], references: [id])
+  profile      Profile?  @relation(fields: [userId], references: [id])
+
+  @@map("campaign_documents")
+}
+
+model CampaignMidia {
+  id         Int            @id @default(autoincrement())
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime?     @updatedAt
+  userId     Int?
+  campaignId Int?
+  midiaUrl   String?
+  midiaType  MidiaTypeEnum @default(image)
+  campaign   Campaign?     @relation(fields: [campaignId], references: [id])
+  profile    Profile?      @relation(fields: [userId], references: [id])
+
+  @@map("campaign_midias")
+}
+
+model CampaignUpdate {
+  id          Int            @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  title       String?
+  description String?
+  campaignId  Int?
+  userId      Int?
+  campaign    Campaign? @relation(fields: [campaignId], references: [id])
+  profile     Profile?  @relation(fields: [userId], references: [id])
+
+  @@map("campaign_updates")
+}
+
+model Campaign {
+  id                    Int            @id @default(autoincrement())
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime?       @updatedAt
+  categoryId            Int?
+  description           String?
+  fundraisingGoal       Float?
+  fundsRaised           Float?
+  imageCoverUrl         String?
+  institution           String?
+  location              String?
+  numberOfContributions Int?
+  ongId                 Int?
+  phoneNumber           String?
+  priority              Int?            @default(0) // Removido @db.SmallInt
+  endDate               DateTime? // Removido @db.Timestamptz(6)
+  title                 String?
+  userId                Int? // Removido @db.Uuid
+  startDate             DateTime? // Removido @db.Timestamptz(6)
+  isUrgent              Boolean?        @default(false)
+  isActivate            Boolean?        @default(true)
+  beneficiaryName       String?
+  campaignType          String?
+  currency              String          @default("AOA")
+  birth                 DateTime? // Removido @db.Date
+  status                CampaignStatus? @default(active)
+
+  campaignComments     CampaignComment[]
+  campaignContributors CampaignContributor[]
+  campaignDocuments    CampaignDocument[]
+  campaignMidias       CampaignMidia[]
+  campaignUpdates      CampaignUpdate[]
+
+  category Category? @relation(fields: [categoryId], references: [id])
+  ong      Ong?      @relation(fields: [ongId], references: [id])
+  profile  Profile?  @relation(fields: [userId], references: [id])
+
+  @@map("campaigns")
+}
+
+model Category {
+  id          Int            @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  campaigns   Campaign[]
+
+  @@map("categories")
+}
+
+model Community {
+  id          Int            @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  userId      Int?
+  name        String?
+  description String?
+  image       String?
+  banner      String?
+  profile Profile? @relation(fields: [userId], references: [id])
+
+  @@map("communities")
+}
+
+model Event {
+  id                 Int            @id @default(autoincrement())
+  ongId              Int?
+  userId             Int?
+  title              String?
+  location           String?
+  description        String?
+  backgroundImageUrl String?
+  startDate          DateTime?
+  enUate             DateTime? // (⚠️ Corrigir para `endDate` se for erro de digitação)
+  crAtedAt           DateTime? @default(now()) // (⚠️ Corrigir para `createdAt` se for erro de digitação)
+  updatedAt          DateTime? @updatedAt
+
+  ong     Ong?     @relation(fields: [ongId], references: [id])
+  profile Profile? @relation(fields: [userId], references: [id])
+
+  @@map("events")
+}
+
+model Favorite {
+  id        Int            @id @default(autoincrement())
+  userId    Int?
+  itemId    Int
+  itemType  String?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+
+  profile Profile? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("favorites")
+}
+
+model Feed {
+  id          Int            @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  userId      Int?
+  ongId       Int?
+  image       String?
+  description String?
+
+  ong     Ong?     @relation(fields: [ongId], references: [id])
+  profile Profile? @relation(fields: [userId], references: [id])
+
+  @@map("feeds")
+}
+
+model Notification {
+  id        Int            @id @default(autoincrement())
+  userId    Int?
+  title     String
+  message   String
+  type      String
+  createdAt DateTime? @default(now())
+  isRead    Boolean?  @default(false)
+  imageUrl  String?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Ong {
+  id              Int            @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime? @updatedAt
+  about           String?
+  bio             String?
+  coverImageUrl   String?
+  isVerified      Boolean?  @default(false)
+  mission         String?
+  name            String?
+  phoneNumber     String?
+  profileImageUrl String?
+  servicesNumber  BigInt?   @default(0)
+  supportsNumber  BigInt?   @default(0)
+  userId          Int?
+  vision          String?
+  status          String    @default("pending")
+  email           String?
+  website         String?
+
+  blogs         Blog[]
+  campaigns     Campaign[]
+  events        Event[]
+  feeds         Feed[]
+  profile       Profile?       @relation(fields: [userId], references: [id])
+  ongsDocuments OngsDocument[]
+
+  @@map("ongs")
+}
+
+model OngsDocument {
+  id                            String          @id @default(uuid())
+  userId                        Int?
+  ongId                         Int?
+  statutes_constitutive_act     String
+  declaration_good_standing     String
+  minutes_constitutive_assembly String
+  publicDeed                    String
+  registrationCertificate       String?
+  nif                           String
+  biRepresentative              String
+  status                        DocumentStatus? @default(pending)
+  createdAt                     DateTime?       @default(now())
+  updatedAt                     DateTime?       @updatedAt
+
+  ong  Ong?  @relation(fields: [ongId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("ongs_documents")
+}
+
+model Payment {
+  id          Int            @id @default(autoincrement())
+  status      String?
+  signature   String?
+  identifier  String?
+  paymentTrx  String?
+  amount      Decimal?  @default(0)
+  paymentType String?
+  currency    String?
+  createdAt   DateTime? @default(now())
+
+  @@map("payments")
+}
+
+model Profile {
+  id          Int            @id @default(autoincrement())
+  firstName   String?
+  email       String?   @unique
+  avatarUrl   String?
+  bio         String?
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  location    String?
+  isVerified  Boolean?  @default(false)
+  role        String?
+  donationQtd BigInt?   @default(0)
+  campaignQtd BigInt?   @default(0)
+  lastName    String?
+  fullName    String?
+  phoneNumber String?
+
+  blogs                Blog[]
+  campaignComments     CampaignComment[]
+  campaignContributors CampaignContributor[]
+  campaignDocuments    CampaignDocument[]
+  campaignMidias       CampaignMidia[]
+  campaignUpdates      CampaignUpdate[]
+  campaigns            Campaign[]
+  communities          Community[]
+  events               Event[]
+  favorites            Favorite[]
+  feeds                Feed[]
+  Ong                  Ong[]
+
+  user User @relation(fields: [id], references: [id])
+
+  @@map("profiles")
+}
+
+model UserFcmToken {
+  id        Int            @id @default(autoincrement())
+  userId    Int?
+  fcmToken  String    @unique
+  createdAt DateTime? @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_fcm_tokens")
 }
 
 enum MidiaTypeEnum {
@@ -30,332 +366,4 @@ enum DocumentStatus {
   pending
   approved
   rejected
-}
-
-model User {
-  id            String    @id @map("id") @db.Uuid
-  email         String?   @unique
-  phone         String?   @unique
-  aud           String?
-  roleName     String?   @map("role")
-  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime? @updatedAt @db.Timestamptz(6)
-  emailConfirmedAt DateTime? @db.Timestamptz(6)
-  phoneConfirmedAt DateTime? @db.Timestamptz(6)
-  lastSignInAt DateTime? @db.Timestamptz(6)
-  isSuperAdmin Boolean?  
-  profiles      Profile?
-  notifications Notification[]
-  ongsDocuments OngsDocument[]
-  userFcmTokens UserFcmToken[]
-
-  @@map("users")  
-}
-
-model Blog {
-  id          String    @id @default(uuid()) @db.Uuid
-  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime? @updatedAt @db.Timestamptz(6)
-  description String?
-  userId     String?   @db.Uuid
-  ongId      String?   @db.Uuid
-  title       String?
-  image       String?
-  ong         Ong?      @relation(fields: [ongId], references: [id])
-  profile     Profile?  @relation(fields: [userId], references: [id])
-
-  @@map("blogs")  
-}
-
-model CampaignComment {
-  id          String    @id @default(uuid()) @db.Uuid
-  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime? @updatedAt @db.Timestamptz(6)
-  userId     String?   @db.Uuid
-  campaignId String?   @db.Uuid
-  description String?
-  campaign    Campaign? @relation(fields: [campaignId], references: [id])
-  profile     Profile?  @relation(fields: [userId], references: [id])
-
-  @@map("campaign_comments")
-}
-
-model CampaignContributor {
-  id            String    @id @default(uuid()) @db.Uuid
-  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime? @updatedAt @db.Timestamptz(6)
-  campaignId   String?   @db.Uuid
-  userId       String?   @db.Uuid
-  money         Decimal?  @default(0) @db.Decimal(10, 2)
-  isAnonymous  Boolean?  @default(false)
-  campaign      Campaign? @relation(fields: [campaignId], references: [id])
-  profile       Profile?  @relation(fields: [userId], references: [id])
-
-  @@map("campaign_contributors")
-}
-
-model CampaignDocument {
-  id           String    @id @default(uuid()) @db.Uuid
-  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
-  documentPath String?
-  updatedAt   DateTime? @updatedAt @db.Timestamptz(6)
-  campaignId  String?   @db.Uuid
-  userId      String?   @db.Uuid
-  isApproved  Boolean?  @default(false)
-  campaign     Campaign? @relation(fields: [campaignId], references: [id])
-  profile      Profile?  @relation(fields: [userId], references: [id])
-
-  @@map("campaign_documents")
-}
-
-model CampaignMidia {
-  id          String      @id @default(uuid()) @db.Uuid
-  createdAt  DateTime    @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime?   @updatedAt @db.Timestamptz(6)
-  userId     String?     @db.Uuid
-  campaignId String?     @db.Uuid
-  midiaUrl   String?
-  midiaType  MidiaTypeEnum @default(image)
-  campaign    Campaign?   @relation(fields: [campaignId], references: [id])
-  profile     Profile?    @relation(fields: [userId], references: [id])
-
-  @@map("campaign_midias")
-}
-
-model CampaignUpdate {
-  id          String    @id @default(uuid()) @db.Uuid
-  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime? @updatedAt @db.Timestamptz(6)
-  title       String?
-  description String?
-  campaignId String?   @db.Uuid
-  userId     String?   @db.Uuid
-  campaign    Campaign? @relation(fields: [campaignId], references: [id])
-  profile     Profile?  @relation(fields: [userId], references: [id])
-
-  @@map("campaign_updates")
-}
-
-model Campaign {
-  id                    String                @id @default(uuid()) @db.Uuid
-  createdAt            DateTime              @default(now()) @db.Timestamptz(6)
-  updatedAt            DateTime?             @updatedAt @db.Timestamptz(6)
-  categoryId           String?               @db.Uuid
-  description           String?
-  fundraisingGoal      Float?
-  fundsRaised          Float?
-  imageCoverUrl       String?
-  institution           String?
-  location              String?
-  numberOfContributions Int?
-  ongId                String?               @db.Uuid
-  phoneNumber          String?
-  priority              Int?                  @default(0) @db.SmallInt
-  endDate              DateTime?             @db.Timestamptz(6)
-  title                 String?
-  userId               String?               @db.Uuid
-  startDate            DateTime?             @db.Timestamptz(6)
-  isUrgent             Boolean?              @default(false)
-  isActivate           Boolean?              @default(true)
-  beneficiaryName      String?
-  campaignType         String?
-  currency              String                @default("AOA")
-  birth                 DateTime?             @db.Date
-  status                CampaignStatus?       @default(active)
-  category              Category?             @relation(fields: [categoryId], references: [id])
-  ong                   Ong?                  @relation(fields: [ongId], references: [id])
-  profile               Profile?              @relation(fields: [userId], references: [id])
-  campaignComments      CampaignComment[]
-  campaignContributors  CampaignContributor[]
-  campaignDocuments     CampaignDocument[]
-  campaignMidias        CampaignMidia[]
-  campaignUpdates       CampaignUpdate[]
-
-  @@map("campaigns")
-}
-
-model Category {
-  id          String     @id @default(uuid()) @db.Uuid
-  name        String     @unique
-  description String?
-  createdAt  DateTime   @default(now()) @db.Timestamptz(6)
-  campaigns   Campaign[]
-
-  @@map("categories")
-}
-
-model Community {
-  id          String    @id @default(uuid()) @db.Uuid
-  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
-  userId     String?   @db.Uuid
-  name        String?
-  description String?
-  image       String?
-  banner      String?
-  profile     Profile?  @relation(fields: [userId], references: [id])
-
-  @@map("communities")
-}
-
-model Event {
-  id                 String    @id @default(uuid()) @db.Uuid
-  ongId             String?   @db.Uuid
-  userId            String?   @db.Uuid
-  title              String?
-  location           String?
-  description        String?
-  backgroundImageUrl String?
-  startDate         DateTime? @db.Timestamptz(6)
-  enUate           DateTime? @db.Timestamptz(6)
-  crAtedAt         DateTime? @default(now()) @db.Timestamptz(6)
-  updatedAt      DateTime? @updatedAt @db.Timestamptz(6)
-  ong            Ong?      @relation(fields: [ongId], references: [id])
-  profile            Profile?  @relation(fields: [userId], references: [id])
-
-  @@map("events")
-}
-
-model Favorite {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId     String?   @db.Uuid
-  itemId     String    @db.Uuid
-  itemType   String?
-  createdAt  DateTime? @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime? @updatedAt @db.Timestamptz(6)
-  profile     Profile?  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("favorites")
-}
-
-model Feed {
-  id          String    @id @default(uuid()) @db.Uuid
-  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
-  userId     String?   @db.Uuid
-  ongId      String?   @db.Uuid
-  image       String?
-  description String?
-  ong         Ong?      @relation(fields: [ongId], references: [id])
-  profile     Profile?  @relation(fields: [userId], references: [id])
-
-  @@map("feeds")
-}
-
-model Notification {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId     String?   @db.Uuid
-  title       String
-  message     String
-  type        String
-  createdAt  DateTime? @default(now()) @db.Timestamptz(6)
-  isRead     Boolean?  @default(false)
-  imageUrl   String?
-  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("notifications")
-}
-
-model Ong {
-  id                String           @id @default(uuid()) @db.Uuid
-  createdAt        DateTime         @default(now()) @db.Timestamptz(6)
-  updatedAt        DateTime?        @updatedAt @db.Timestamptz(6)
-  about             String?
-  bio               String?
-  coverImageUrl   String?
-  isVerified       Boolean?         @default(false)
-  mission           String?
-  name              String?
-  phoneNumber      String?
-  profileImageUrl String?
-  servicesNumber   BigInt?          @default(0)
-  supportsNumber   BigInt?          @default(0)
-  userId           String?          @db.Uuid
-  vision            String?
-  status            String           @default("pending")
-  email             String?
-  website           String?
-  profile           Profile?         @relation(fields: [userId], references: [id])
-  blogs             Blog[]
-  campaigns         Campaign[]
-  events            Event[]
-  feeds             Feed[]
-  ongsDocuments     OngsDocument[]
-
-  @@map("ongs")
-}
-
-model OngsDocument {
-  id                           String         @id @default(uuid()) @db.Uuid
-  userId                      String?        @db.Uuid
-  ongId                       String?        @db.Uuid
-  statutes_constitutive_act    String
-  declaration_good_standing    String
-  minutes_constitutive_assembly String
-  publicDeed                  String
-  registrationCertificate     String?
-  nif                          String
-  biRepresentative            String
-  status                       DocumentStatus? @default(pending)
-  createdAt                   DateTime?      @default(now()) @db.Timestamptz(6)
-  updatedAt                   DateTime?      @updatedAt @db.Timestamptz(6)
-  ong                          Ong?           @relation(fields: [ongId], references: [id])
-  user                         User?          @relation(fields: [userId], references: [id])
-
-  @@map("ongs_documents")
-}
-
-model Payment {
-  id           String    @id @default(uuid()) @db.Uuid
-  status       String?
-  signature    String?
-  identifier   String?
-  paymentTrx  String?
-  amount       Decimal?  @db.Decimal(10, 2)
-  paymentType String?
-  currency     String?
-  createdAt   DateTime? @default(now()) @db.Timestamptz(6)
-
-  @@map("payments")
-}
-
-model Profile {
-  id           String    @id @default(uuid()) @db.Uuid
-  firstName   String?
-  email        String?   @unique
-  avatarUrl   String?
-  bio          String?
-  createdAt   DateTime? @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime? @updatedAt @db.Timestamptz(6)
-  location     String?
-  isVerified  Boolean?  @default(false)
-  role         String?
-  donationQtd BigInt?   @default(0)
-  campaignQtd BigInt?   @default(0)
-  lastName    String?
-  fullName    String?
-  phoneNumber String?
-  user         User      @relation(fields: [id], references: [id])
-  blogs        Blog[]
-  campaignComments CampaignComment[]
-  campaignContributors CampaignContributor[]
-  campaignDocuments CampaignDocument[]
-  campaignMidias CampaignMidia[]
-  campaignUpdates CampaignUpdate[]
-  campaigns    Campaign[]
-  communities  Community[]
-  events       Event[]
-  favorites    Favorite[]
-  feeds        Feed[]
-
-  @@map("profiles")
-  Ong Ong[]
-}
-
-model UserFcmToken {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId     String?   @db.Uuid
-  fcmToken   String    @unique
-  createdAt  DateTime? @default(now()) @db.Timestamptz(6)
-  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("user_fcm_tokens")
 }
