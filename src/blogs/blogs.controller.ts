@@ -31,7 +31,7 @@ export class BlogsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.blogsService.findOne(+id);
+    return this.blogsService.findOne(Number(id));
   }
 
   @Patch(':id')
@@ -39,7 +39,7 @@ export class BlogsController {
     @Param('id') id: string,
     @Body() updateBlogDto: UpdateBlogDto,
   ) {
-    return this.blogsService.update(id, updateBlogDto);
+    return this.blogsService.update(Number(id), updateBlogDto);
   }
 
   @Delete(':id')

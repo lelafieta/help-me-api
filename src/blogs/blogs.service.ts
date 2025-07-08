@@ -15,11 +15,11 @@ export class BlogsService {
     return this.prisma.blog.findMany();
   }
 
-  findOne(id: String) {
+  findOne(id: number) {
     return this.prisma.blog.findUnique({ where: { id } });
   }
 
-  update(id: String, updateBlogDto: UpdateBlogDto) {
+  update(id: number, updateBlogDto: UpdateBlogDto) {
     return this.prisma.blog.update({ where: { id }, data: updateBlogDto });
   }
 

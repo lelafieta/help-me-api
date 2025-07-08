@@ -31,7 +31,7 @@ export class OngsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.ongsService.findOne(id);
+    return this.ongsService.findOne(Number(id));
   }
 
   @Patch(':id')
@@ -39,11 +39,11 @@ export class OngsController {
     @Param('id') id: string,
     @Body() updateOngDto: UpdateOngDto,
   ) {
-    return this.ongsService.update(id, updateOngDto);
+    return this.ongsService.update(Number(id), updateOngDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.ongsService.remove(id);
+    return this.ongsService.remove(Number(id));
   }
 }

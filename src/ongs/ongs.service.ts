@@ -15,15 +15,15 @@ export class OngsService {
     return this.prisma.ong.findMany();
   }
 
-  findOne(id: string) {
+  findOne(id: number) {
     return this.prisma.ong.findUnique({ where: { id } });
   }
 
-  update(id: string, updateOngDto: UpdateOngDto) {
+  update(id: number, updateOngDto: UpdateOngDto) {
     return this.prisma.ong.update({ where: { id }, data: updateOngDto });
   }
 
-  remove(id: string) {
+  remove(id: number) {
     return this.prisma.ong.delete({ where: { id } });
   }
 }

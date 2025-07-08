@@ -31,7 +31,7 @@ export class EventsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.eventsService.findOne(id);
+    return this.eventsService.findOne(Number(id));
   }
 
   @Patch(':id')
@@ -39,11 +39,11 @@ export class EventsController {
     @Param('id') id: string,
     @Body() updateEventDto: UpdateEventDto,
   ) {
-    return this.eventsService.update(id, updateEventDto);
+    return this.eventsService.update(Number(id), updateEventDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.eventsService.remove(id);
+    return this.eventsService.remove(Number(id));
   }
 }

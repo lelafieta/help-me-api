@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import { Prisma } from 'generated/prisma';
 
 @Injectable()
 export class FavoritesService {
   constructor(private prisma: PrismaService) {}
 
-  create(createFavoriteDto: CreateFavoriteDto) {
+  create(createFavoriteDto: Prisma.FavoriteCreateInput) {
     return this.prisma.favorite.create({ data: createFavoriteDto });
   }
 
@@ -15,15 +14,15 @@ export class FavoritesService {
     return this.prisma.favorite.findMany();
   }
 
-  findOne(id: string) {
+  findOne(id: number) {
     return this.prisma.favorite.findUnique({ where: { id } });
   }
 
-  update(id: string, updateFavoriteDto: UpdateFavoriteDto) {
+  update(id: number, updateFavoriteDto: Prisma.FavoriteUpdateInput) {
     return this.prisma.favorite.update({ where: { id }, data: updateFavoriteDto });
   }
 
-  remove(id: string) {
+  remove(id: number) {
     return this.prisma.favorite.delete({ where: { id } });
   }
 }

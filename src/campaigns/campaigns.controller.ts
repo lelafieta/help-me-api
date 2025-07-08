@@ -10,9 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
-import { CreateCampaignDto } from './dto/create-campaign.dto';
-import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Prisma } from 'generated/prisma';
 
 @Controller('campaigns')
 @UseGuards(AuthGuard('jwt'))
@@ -20,7 +19,7 @@ export class CampaignsController {
   constructor(private readonly campaignsService: CampaignsService) {}
 
   @Post()
-  create(@Body() createCampaignDto: CreateCampaignDto) {
+  create(@Body() createCampaignDto: Prisma.CampaignCreateInput) {
     return this.campaignsService.create(createCampaignDto);
   }
 
@@ -31,19 +30,19 @@ export class CampaignsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.campaignsService.findOne(id);
+    return this.campaignsService.findOne(Number(id));
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateCampaignDto: UpdateCampaignDto,
+    @Body() updateCampaignDto: Prisma.CampaignUpdateInput,
   ) {
-    return this.campaignsService.update(id, updateCampaignDto);
+    return this.campaignsService.update(Number(id), updateCampaignDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.campaignsService.remove(id);
+    return this.campaignsService.remove(Number(id));
   }
 }
