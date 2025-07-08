@@ -175,7 +175,7 @@ model Campaign {
 }
 
 model Category {
-  id          String     @id @db.Uuid
+  id          String     @id @default(uuid()) @db.Uuid
   name        String     @unique
   description String?
   createdAt  DateTime   @default(now()) @db.Timestamptz(6)
@@ -318,7 +318,7 @@ model Payment {
 }
 
 model Profile {
-  id           String    @id @db.Uuid
+  id           String    @id @default(uuid()) @db.Uuid
   firstName   String?
   email        String?   @unique
   avatarUrl   String?

@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { LoginAuthDto } from './dto/login-auth.dto';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(private jwtService: JwtService) {}
+
+  async register(createAuthDto: CreateAuthDto) {
+    // In a real application, you would interact with Supabase here
+    // For now, we'll just simulate a user creation and return a token
+    const user = { username: createAuthDto.email, password: createAuthDto.password }; // Placeholder
+    const payload = { username: user.username, sub: user.username }; // Placeholder for user ID
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async login(loginAuthDto: LoginAuthDto) {
+    // In a real application, you would interact with Supabase here to verify credentials
+    // For now, we'll just simulate a successful login and return a token
+    const user = { username: loginAuthDto.email, password: loginAuthDto.password }; // Placeholder
+    const payload = { username: user.username, sub: user.username }; // Placeholder for user ID
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }
