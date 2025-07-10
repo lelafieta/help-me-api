@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { Prisma } from 'generated/prisma';
@@ -16,11 +15,11 @@ export class ProfilesService {
   async findAll() {
     const profiles = await this.prisma.profile.findMany();
 
-    return profiles.map((profile) => ({
-      ...profile,
-      donationQtd: profile.donationQtd?.toString() ?? "0",
-      campaignQtd: profile.campaignQtd?.toString() ?? "0",
-    }));
+return profiles.map((profile) => ({
+  ...profile,
+  donationQtd: profile.donationQtd?.toString() ?? "0",
+  campaignQtd: profile.campaignQtd?.toString() ?? "0",
+}));
   }
 
   findOne(id: number) {

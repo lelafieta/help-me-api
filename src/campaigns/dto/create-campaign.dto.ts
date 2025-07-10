@@ -3,7 +3,7 @@ import { CampaignStatus } from 'generated/prisma';
 
 export class CreateCampaignDto {
   @IsOptional()
-  @IsString()
+  @IsNumber()
   categoryId?: string;
 
   @IsOptional()
@@ -35,7 +35,7 @@ export class CreateCampaignDto {
   numberOfContributions?: number;
 
   @IsOptional()
-  @IsString()
+  @IsNumber()
   ongId?: string;
 
   @IsOptional()
@@ -55,7 +55,7 @@ export class CreateCampaignDto {
   title?: string;
 
   @IsOptional()
-  @IsString()
+  @IsNumber()
   userId?: string;
 
   @IsOptional()

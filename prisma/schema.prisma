@@ -187,8 +187,8 @@ model Event {
   description        String?
   backgroundImageUrl String?
   startDate          DateTime?
-  enUate             DateTime? // (⚠️ Corrigir para `endDate` se for erro de digitação)
-  crAtedAt           DateTime? @default(now()) // (⚠️ Corrigir para `createdAt` se for erro de digitação)
+  endDate             DateTime? // (⚠️ Corrigir para `endDate` se for erro de digitação)
+  createdAt           DateTime? @default(now()) // (⚠️ Corrigir para `createdAt` se for erro de digitação)
   updatedAt          DateTime? @updatedAt
 
   ong     Ong?     @relation(fields: [ongId], references: [id])
