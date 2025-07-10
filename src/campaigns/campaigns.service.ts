@@ -63,11 +63,11 @@ export class CampaignsService {
           campaignType: dto.campaignType,
           currency: dto.currency ?? 'AOA',
           startDate: dto.startDate ? new Date(dto.startDate) : null,
-          endDate:   dto.endDate ? new Date(dto.endDate) : null,
+          endDate: dto.endDate ? new Date(dto.endDate) : null,
           birth: dto.birth ? new Date(dto.birth) : null,
           isUrgent: Boolean(dto.isUrgent),
           isActivate: Boolean(dto.isActivate),
-          userId: Number(dto.userId),
+          profileId: Number(dto.userId),
 
           campaignDocuments: {
             connect: createdDocuments.map((doc) => ({ id: doc.id })),
@@ -90,6 +90,22 @@ export class CampaignsService {
 
   findOne(id: number) {
     return this.prisma.campaign.findUnique({ where: { id } });
+  }
+
+  findCampaignByCategoryId(categoryId: number) {
+    return this.prisma.campaign.findMany({
+      where: { categoryId },
+      include: {
+        category: true,
+        ong: true,          
+        profile: true,      
+        campaignDocuments: true,
+        campaignMidias: true,
+        campaignUpdates: true,
+        campaignContributors: true,
+        campaignComments: true,
+      },
+    });
   }
 
   update(id: number, updateCampaignDto: Prisma.CampaignUpdateInput) {

@@ -82,6 +82,11 @@ export class CampaignsController {
     return this.campaignsService.findOne(Number(id));
   }
 
+  @Get('/category/:id')
+  findCampaignByCategoryId(@Param('id') id: string) {
+    return this.campaignsService.findCampaignByCategoryId(Number(id));
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,
