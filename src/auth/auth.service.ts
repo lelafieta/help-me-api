@@ -11,51 +11,57 @@ export class AuthService {
     private jwtService: JwtService,
     private prisma: PrismaService,
   ) { }
-
   async register(createAuthDto: CreateAuthDto) {
-  const { name, email, password, phone } = createAuthDto;
+    const { name, email, password, phone } = createAuthDto;
 
-  const existingUser = await this.prisma.user.findUnique({ where: { email } });
+    const existingUser = await this.prisma.user.findUnique({ where: { email } });
 
-  if (existingUser) {
-    throw new ConflictException('Email já está em uso');
+    if (existingUser) {
+      throw new ConflictException('Email já está em uso');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ✂️ Divide o nome completo
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || null;
+
+    // 1️⃣ Cria o usuário
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        name,
+        phone,
+        roleName: "user",
+        password: hashedPassword,
+      },
+    });
+
+    // 2️⃣ Cria o perfil com o mesmo ID e nomes separados
+    await this.prisma.profile.create({
+      data: {
+        id: user.id,
+        email: email,
+        phoneNumber: phone,
+        fullName: name,
+        firstName: firstName,
+        lastName: lastName,
+        role: 'user',
+      },
+    });
+
+    // JWT
+    const payload = { sub: user.id, email: user.email };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  // 1️⃣ Cria o usuário
-  const user = await this.prisma.user.create({
-    data: {
-      email,
-      name,
-      phone,
-      roleName: "user",
-      password: hashedPassword,
-    },
-  });
-
-  // 2️⃣ Cria o perfil com mesmo ID do usuário
-  await this.prisma.profile.create({
-    data: {
-      id: user.id, 
-      email: email,
-      phoneNumber: phone,
-      fullName: name,
-      role: 'user',
-    },
-  });
-
-  // JWT
-  const payload = { sub: user.id, email: user.email };
-  return {
-    access_token: this.jwtService.sign(payload),
-  };
-}
 
 
 
   async login(loginAuthDto: LoginAuthDto) {
-    const { email, password } = loginAuthDto;
+    const { email } = loginAuthDto;
 
     const user = await this.prisma.user.findUnique({ where: { email } });
 

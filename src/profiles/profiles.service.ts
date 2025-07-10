@@ -13,8 +13,14 @@ export class ProfilesService {
     return this.prisma.profile.create({ data: createProfileDto });
   }
 
-  findAll() {
-    return this.prisma.profile.findMany();
+  async findAll() {
+    const profiles = await this.prisma.profile.findMany();
+
+    return profiles.map((profile) => ({
+      ...profile,
+      donationQtd: profile.donationQtd?.toString() ?? "0",
+      campaignQtd: profile.campaignQtd?.toString() ?? "0",
+    }));
   }
 
   findOne(id: number) {
