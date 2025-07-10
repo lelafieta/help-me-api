@@ -305,7 +305,7 @@ model Payment {
 }
 
 model Profile {
-  id          Int            @id @default(autoincrement())
+  id          Int            @id
   firstName   String?
   email       String?   @unique
   avatarUrl   String?

@@ -11,6 +11,7 @@ import { CommunitiesModule } from './communities/communities.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { PrismaModule } from './database/prisma.module';
+import { ProfilesModule } from './profiles/profiles.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { PrismaModule } from './database/prisma.module';
     CommunitiesModule,
     FavoritesModule,
     BlogsModule,
-    PrismaModule,    
+    PrismaModule,
+    ProfilesModule,    
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
