@@ -65,8 +65,8 @@ export class CampaignsService {
           startDate: dto.startDate ? new Date(dto.startDate) : null,
           endDate:   dto.endDate ? new Date(dto.endDate) : null,
           birth: dto.birth ? new Date(dto.birth) : null,
-          isUrgent: dto.isUrgent ?? false,
-          isActivate: dto.isActivate ?? true,
+          isUrgent: Boolean(dto.isUrgent),
+          isActivate: Boolean(dto.isActivate),
           userId: Number(dto.userId),
 
           campaignDocuments: {
