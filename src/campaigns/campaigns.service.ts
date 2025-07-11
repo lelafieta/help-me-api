@@ -67,8 +67,7 @@ export class CampaignsService {
           birth: dto.birth ? new Date(dto.birth) : null,
           isUrgent: Boolean(dto.isUrgent),
           isActivate: Boolean(dto.isActivate),
-          profileId: Number(dto.userId),
-
+          userId: Number(dto.userId),
           campaignDocuments: {
             connect: createdDocuments.map((doc) => ({ id: doc.id })),
           },
@@ -98,7 +97,7 @@ export class CampaignsService {
       include: {
         category: true,
         ong: true,          
-        profile: true,      
+        user: true,
         campaignDocuments: true,
         campaignMidias: true,
         campaignUpdates: true,

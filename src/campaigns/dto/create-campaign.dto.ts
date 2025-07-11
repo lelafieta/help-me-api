@@ -1,5 +1,4 @@
 import { IsString, IsOptional, IsNumber, IsDate, IsBoolean } from 'class-validator';
-import { CampaignStatus } from 'generated/prisma';
 
 export class CreateCampaignDto {
   @IsOptional()
@@ -86,6 +85,6 @@ export class CreateCampaignDto {
   @IsDate()
   birth?: Date;
 
-  @IsOptional()  
-  status?: CampaignStatus;
+  // @IsOptional()  
+  // status?: CampaignStatus;
 }

@@ -27,6 +27,7 @@ model User {
   userFcmTokens    UserFcmToken[]
 
   @@map("users")
+  Campaign Campaign[]
 }
 
 model Blog {
@@ -130,7 +131,7 @@ model Campaign {
   priority              Int?                  @default(0)
   endDate               DateTime?
   title                 String?
-  profileId             Int?
+  userId             Int?
   startDate             DateTime?
   isUrgent              Boolean?              @default(false)
   isActivate            Boolean?              @default(true)
@@ -144,7 +145,7 @@ model Campaign {
   campaignDocuments     CampaignDocument[]
   campaignMidias        CampaignMidia[]
   campaignUpdates       CampaignUpdate[]
-  profile               Profile?              @relation(fields: [profileId], references: [id])
+  user                  User?              @relation(fields: [userId], references: [id])
   ong                   Ong?                  @relation(fields: [ongId], references: [id])
   category              Category?             @relation(fields: [categoryId], references: [id])
 
@@ -316,7 +317,6 @@ model Profile {
   campaignDocuments    CampaignDocument[]
   campaignMidias       CampaignMidia[]
   campaignUpdates      CampaignUpdate[]
-  campaigns            Campaign[]
   communities          Community[]
   events               Event[]
   favorites            Favorite[]
