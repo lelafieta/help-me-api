@@ -217,7 +217,7 @@ CREATE TABLE "ongs" (
     "status" TEXT NOT NULL DEFAULT 'pending',
     "email" TEXT,
     "website" TEXT,
-    CONSTRAINT "ongs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "profiles" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "ongs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable

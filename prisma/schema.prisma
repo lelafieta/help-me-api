@@ -25,9 +25,10 @@ model User {
   ongsDocuments    OngsDocument[]
   profiles         Profile?
   userFcmTokens    UserFcmToken[]
-
-  @@map("users")
   Campaign Campaign[]
+  Ong Ong[]
+
+  @@map("users")  
 }
 
 model Blog {
@@ -244,8 +245,8 @@ model Ong {
   name            String?
   phoneNumber     String?
   profileImageUrl String?
-  servicesNumber  BigInt?        @default(0)
-  supportsNumber  BigInt?        @default(0)
+  servicesNumber  Int?        @default(0)
+  supportsNumber  Int?        @default(0)
   userId          Int?
   vision          String?
   status          String         @default("pending")
@@ -255,7 +256,7 @@ model Ong {
   campaigns       Campaign[]
   events          Event[]
   feeds           Feed[]
-  profile         Profile?       @relation(fields: [userId], references: [id])
+  user         User?       @relation(fields: [userId], references: [id])
   ongsDocuments   OngsDocument[]
 
   @@map("ongs")
@@ -320,8 +321,7 @@ model Profile {
   communities          Community[]
   events               Event[]
   favorites            Favorite[]
-  feeds                Feed[]
-  Ong                  Ong[]
+  feeds                Feed[]  
   user                 User                  @relation(fields: [id], references: [id])
 
   @@map("profiles")

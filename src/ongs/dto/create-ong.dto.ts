@@ -1,63 +1,62 @@
-import { IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsInt,
+  IsUrl,
+  IsEmail
+} from 'class-validator';
 
 export class CreateOngDto {
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'O campo "about" deve ser um texto.' })
   about?: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'O campo "bio" deve ser um texto.' })
   bio?: string;
 
   @IsOptional()
-  @IsString()
-  cover_image_url?: string;
+  @IsUrl({}, { message: 'A URL da imagem de capa é inválida.' })
+  coverImageUrl?: string;
 
   @IsOptional()
-  @IsBoolean()
-  is_verified?: boolean;
+  @IsBoolean({ message: 'O campo "isVerified" deve ser verdadeiro ou falso.' })
+  isVerified?: boolean;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'O campo "mission" deve ser um texto.' })
   mission?: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'O nome deve ser um texto.' })
   name?: string;
 
   @IsOptional()
-  @IsString()
-  phone_number?: string;
+  @IsString({ message: 'O número de telefone deve ser um texto.' })
+  phoneNumber?: string;
 
   @IsOptional()
-  @IsString()
-  profile_image_url?: string;
+  @IsUrl({}, { message: 'A URL da imagem de perfil é inválida.' })
+  profileImageUrl?: string;
 
   @IsOptional()
-  @IsNumber()
-  services_number?: number;
+  @IsInt({ message: 'O campo "userId" deve ser um número inteiro.' })
+  userId?: number;
 
   @IsOptional()
-  @IsNumber()
-  supports_number?: number;
-
-  @IsOptional()
-  @IsString()
-  user_id?: string;
-
-  @IsOptional()
-  @IsString()
+  @IsString({ message: 'O campo "vision" deve ser um texto.' })
   vision?: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'O status deve ser um texto.' })
   status?: string;
 
   @IsOptional()
-  @IsString()
+  @IsEmail({}, { message: 'O campo "email" deve conter um email válido.' })
   email?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUrl({}, { message: 'A URL do website é inválida.' })
   website?: string;
 }

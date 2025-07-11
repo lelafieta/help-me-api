@@ -7,8 +7,26 @@ import { UpdateOngDto } from './dto/update-ong.dto';
 export class OngsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createOngDto: CreateOngDto) {
-    return this.prisma.ong.create({ data: createOngDto });
+  async create(createOngDto: CreateOngDto) {
+    
+    const data = {
+      about: createOngDto.about,
+      bio: createOngDto.bio,
+      coverImageUrl: createOngDto.coverImageUrl,
+      isVerified: createOngDto.isVerified ?? false,
+      mission: createOngDto.mission,
+      name: createOngDto.name,
+      phoneNumber: createOngDto.phoneNumber,
+      profileImageUrl: createOngDto.profileImageUrl,
+      servicesNumber: Number(0), 
+      supportsNumber: Number(0), 
+      userId: createOngDto.userId ? Number(createOngDto.userId) : undefined,
+      vision: createOngDto.vision,
+      status: createOngDto.status ?? 'pending',
+      email: createOngDto.email,
+      website: createOngDto.website,
+    };    
+    return this.prisma.ong.create({ data });
   }
 
   findAll() {
