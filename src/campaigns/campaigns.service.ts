@@ -84,19 +84,10 @@ export class CampaignsService {
 
 
   findAll() {
-    return this.prisma.campaign.findMany();
-  }
-
-  findOne(id: number) {
-    return this.prisma.campaign.findUnique({ where: { id } });
-  }
-
-  findCampaignByCategoryId(categoryId: number) {
     return this.prisma.campaign.findMany({
-      where: { categoryId },
       include: {
         category: true,
-        ong: true,          
+        ong: true,
         user: true,
         campaignDocuments: true,
         campaignMidias: true,
@@ -107,8 +98,87 @@ export class CampaignsService {
     });
   }
 
-  update(id: number, updateCampaignDto: Prisma.CampaignUpdateInput) {
-    return this.prisma.campaign.update({ where: { id }, data: updateCampaignDto });
+  findCampaignsByUserId(userId: number) {
+    return this.prisma.campaign.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        category: true,
+        ong: true,
+        user: true,
+        campaignDocuments: true,
+        campaignMidias: true,
+        campaignUpdates: true,
+        campaignContributors: true,
+        campaignComments: true,
+      },
+    });
+  }
+
+  async findMyCampaignsByStatus(userId: number, status: string) {
+    return this.prisma.campaign.findMany({
+      where: {
+        userId: userId,
+        status: status,       
+      },
+      include: {
+        ong: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+  
+
+  findOne(id: number) {
+    return this.prisma.campaign.findUnique({
+      where: { id }, include: {
+        category: true,
+        ong: true,
+        user: true,
+        campaignDocuments: true,
+        campaignMidias: true,
+        campaignUpdates: true,
+        campaignContributors: true,
+        campaignComments: true,
+      },
+    });
+  }
+
+  findCampaignByCategoryId(categoryId: number) {
+    return this.prisma.campaign.findMany({
+      where: { categoryId },
+      include: {
+        category: true,
+        ong: true,
+        user: true,
+        campaignDocuments: true,
+        campaignMidias: true,
+        campaignUpdates: true,
+        campaignContributors: true,
+        campaignComments: true,
+      },
+    });
+  }
+
+  update(id: number, updateCampaignDto: UpdateCampaignDto) {
+    
+    const data: any = { ...updateCampaignDto };
+    if (data.categoryId !== undefined) {
+      data.categoryId = Number(data.categoryId);
+    }
+    if (data.ongId !== undefined) {
+      data.ongId = Number(data.ongId);
+    }
+    if (data.userId !== undefined) {
+      data.userId = Number(data.userId);
+    }
+    if (data.fundraisingGoal !== undefined) {
+      data.fundraisingGoal = Number(data.fundraisingGoal);
+    }    
+    return this.prisma.campaign.update({ where: { id }, data });
   }
 
   remove(id: number) {

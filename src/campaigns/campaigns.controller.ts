@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   BadRequestException,
   HttpCode,
+  Req,
 } from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -22,6 +23,7 @@ import { AnyFilesInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 import { extname } from 'path';
 import { Multer } from 'multer';
 import { diskStorage } from 'multer';
+import { UpdateCampaignDto } from './dto/update-campaign.dto';
 
 @Controller('campaigns')
 @UseGuards(AuthGuard('jwt'))
@@ -77,6 +79,14 @@ export class CampaignsController {
     return this.campaignsService.findAll();
   }
 
+  @HttpCode(200)
+  @Get('user/:userId')
+  findCampaignsByUserId(@Param('userId') userId: string) {
+    return this.campaignsService.findCampaignsByUserId(Number(userId));
+  }
+
+
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.campaignsService.findOne(Number(id));
@@ -84,14 +94,22 @@ export class CampaignsController {
 
   @Get('/category/:id')
   findCampaignByCategoryId(@Param('id') id: string) {
+    
     return this.campaignsService.findCampaignByCategoryId(Number(id));
   }
+
+  @Get('my-campaigns/:status')
+  getMyCampaignsByStatus(@Req() req, @Param('status') status: string) {
+    return this.campaignsService.findMyCampaignsByStatus(req.user.id, status);
+  }
+
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateCampaignDto: Prisma.CampaignUpdateInput,
+    @Body() updateCampaignDto: UpdateCampaignDto,
   ) {
+   
     return this.campaignsService.update(Number(id), updateCampaignDto);
   }
 

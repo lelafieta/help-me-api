@@ -85,6 +85,7 @@ export class CreateCampaignDto {
   @IsDate()
   birth?: Date;
 
-  // @IsOptional()  
-  // status?: CampaignStatus;
+  @IsOptional()
+  @IsString()
+  status?: String;
 }
