@@ -8,22 +8,35 @@ import {
   Param,
   Delete,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
+  Req,
+  HttpCode,
 } from '@nestjs/common';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Multer } from 'multer';
 
 @Controller('blogs')
 @UseGuards(AuthGuard('jwt'))
 export class BlogsController {
   constructor(private readonly blogsService: BlogsService) {}
 
+  @HttpCode(200)
   @Post()
-  create(@Body() createBlogDto: CreateBlogDto) {
-    return this.blogsService.create(createBlogDto);
+  @UseInterceptors(FileInterceptor('image')) // <- "image" é o nome do campo no form
+  create(
+    @Body() createBlogDto: CreateBlogDto,
+    @UploadedFile() file: Multer.File,
+    @Req() req
+  ) {
+    return this.blogsService.create(createBlogDto, file);
   }
 
+  @HttpCode(200)
   @Get()
   findAll() {
     return this.blogsService.findAll();

@@ -23,12 +23,13 @@ model User {
   password         String
   notifications    Notification[]
   ongsDocuments    OngsDocument[]
-  profiles         Profile?
+  profile         Profile?
   userFcmTokens    UserFcmToken[]
   Campaign Campaign[]
   Ong Ong[]
 
   @@map("users")  
+  Blog Blog[]
 }
 
 model Blog {
@@ -40,10 +41,11 @@ model Blog {
   ongId       Int?
   title       String?
   image       String?
-  profile     Profile?  @relation(fields: [userId], references: [id])
+  user     User?  @relation(fields: [userId], references: [id])
   ong         Ong?      @relation(fields: [ongId], references: [id])
 
   @@map("blogs")
+  Profile Profile[]
 }
 
 model CampaignComment {
