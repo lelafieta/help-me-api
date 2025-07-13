@@ -23,7 +23,7 @@ import { Multer } from 'multer';
 @Controller('blogs')
 @UseGuards(AuthGuard('jwt'))
 export class BlogsController {
-  constructor(private readonly blogsService: BlogsService) {}
+  constructor(private readonly blogsService: BlogsService) { }
 
   @HttpCode(200)
   @Post()
@@ -46,6 +46,17 @@ export class BlogsController {
   findOne(@Param('id') id: string) {
     return this.blogsService.findOne(Number(id));
   }
+
+  @Get('featured')
+  getFeaturedBlogs() {
+    return this.blogsService.findFeaturedBlogs();
+  }
+
+  @Get('for-you')
+  getForYouBlogs(@Req() req) {
+    return this.blogsService.findForYouBlogs(req.user.id);
+  }
+
 
   @Patch(':id')
   update(

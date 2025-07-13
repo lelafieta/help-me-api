@@ -48,6 +48,8 @@ export class AuthService {
         firstName: firstName,
         lastName: lastName,
         role: 'user',
+        latitude: 0, // or provide a default/actual value
+        longitude: 0, // or provide a default/actual value
       },
     });
 

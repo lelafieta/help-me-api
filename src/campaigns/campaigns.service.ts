@@ -55,7 +55,7 @@ export class CampaignsService {
           description: dto.description,
           fundraisingGoal: Number(dto.fundraisingGoal),
           imageCoverUrl: `/uploads/campaign_image_cover/${cover.filename}`, // 📌 Caminho da capa
-          location: dto.location,
+          location: dto.location,          
           categoryId: Number(dto.categoryId),
           ongId: Number(dto.ongId),
           phoneNumber: dto.phoneNumber,
@@ -64,8 +64,7 @@ export class CampaignsService {
           currency: dto.currency ?? 'AOA',
           startDate: dto.startDate ? new Date(dto.startDate) : null,
           endDate: dto.endDate ? new Date(dto.endDate) : null,
-          birth: dto.birth ? new Date(dto.birth) : null,
-          isUrgent: Boolean(dto.isUrgent),
+          birth: dto.birth ? new Date(dto.birth) : null,          
           isActivate: Boolean(dto.isActivate),
           userId: Number(dto.userId),
           status: dto.status !== undefined ? String(dto.status) : undefined,
@@ -121,7 +120,7 @@ export class CampaignsService {
     return this.prisma.campaign.findMany({
       where: {
         userId: userId,
-        status: status,       
+        status: status,
       },
       include: {
         ong: true,
@@ -131,7 +130,7 @@ export class CampaignsService {
       },
     });
   }
-  
+
 
   findOne(id: number) {
     return this.prisma.campaign.findUnique({
@@ -164,10 +163,10 @@ export class CampaignsService {
     });
   }
 
-  update(id: number, updateCampaignDto: UpdateCampaignDto) {    
-    
+  update(id: number, updateCampaignDto: UpdateCampaignDto) {
+
     const data: any = { ...updateCampaignDto };
-    
+
     if (data.categoryId !== undefined) {
       data.categoryId = Number(data.categoryId);
     }
@@ -179,7 +178,7 @@ export class CampaignsService {
     }
     if (data.fundraisingGoal !== undefined) {
       data.fundraisingGoal = Number(data.fundraisingGoal);
-    }    
+    }
     data.status = data.status !== undefined ? String(data.status) : undefined;
     return this.prisma.campaign.update({ where: { id }, data });
   }
@@ -187,4 +186,63 @@ export class CampaignsService {
   remove(id: number) {
     return this.prisma.campaign.delete({ where: { id } });
   }
+
+  async findUrgentCampaignsSmart(userId?: number, limit = 10) {
+    const profile = userId
+      ? await this.prisma.profile.findFirst({ where: { id: userId } })
+      : null;
+
+    const campaigns = await this.prisma.campaign.findMany({
+      where: {
+        isActivate: true,
+        status: 'active',
+        endDate: { gte: new Date() }, // ainda válidas
+      },
+      include: {
+        ong: true,
+        category: true,
+      },
+    });
+
+    const scored = campaigns.map(c => ({
+      ...c,
+      urgencyScore: this.calculateUrgencyScore(c, profile),
+    }));
+
+    return scored
+      .filter(c => c.urgencyScore >= 4)
+      .sort((a, b) => b.urgencyScore - a.urgencyScore)
+      .slice(0, limit);
+  }
+
+
+
+  calculateUrgencyScore(campaign: any, profile?: any): number {
+    const now = new Date();
+    const end = new Date(campaign.endDate);
+    const daysLeft = (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+
+    const arrecadado = campaign.fundsRaised ?? 0;
+    const meta = campaign.fundraisingGoal ?? 1;
+    const porcentagem = arrecadado / meta;
+
+    let score = 0;
+
+    if (daysLeft <= 5) score += 2;
+    if (porcentagem < 0.3) score += 2;
+    if ((campaign.numberOfContributions ?? 0) <= 3) score += 1;
+
+    const criticalTypes = ['saúde', 'emergência', 'acidente', 'infância'];
+    if (criticalTypes.includes((campaign.campaignType ?? '').toLowerCase())) score += 2;
+
+    if (profile?.location &&
+      campaign.location &&
+      campaign.location.toLowerCase().includes(profile.location.toLowerCase())) {
+      score += 1;
+    }
+
+    return score;
+  }
+
+
 }

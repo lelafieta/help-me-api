@@ -27,9 +27,19 @@ model User {
   userFcmTokens    UserFcmToken[]
   Campaign Campaign[]
   Ong Ong[]
-
-  @@map("users")  
   Blog Blog[]
+  Feed Feed[]
+  FeedComment FeedComment[]
+  CampaignContributor CampaignContributor[]
+  CampaignComment CampaignComment[]
+  CampaignDocument CampaignDocument[]
+  CampaignMidia CampaignMidia[]
+  CampaignUpdate CampaignUpdate[]
+  Community Community[]
+  Event Event[]
+  FeedLike FeedLike[]
+  FeedView FeedView[]
+  @@map("users")  
 }
 
 model Blog {
@@ -44,8 +54,47 @@ model Blog {
   user     User?  @relation(fields: [userId], references: [id])
   ong         Ong?      @relation(fields: [ongId], references: [id])
 
-  @@map("blogs")
-  Profile Profile[]
+  @@map("blogs")  
+}
+
+model FeedComment {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  userId      Int?
+  feedId  Int?
+  description String?
+  user    User?  @relation(fields: [userId], references: [id])
+  feed    Feed? @relation(fields: [feedId], references: [id])
+
+  @@map("feed_comments")
+}
+
+
+model FeedLike {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  userId      Int?
+  feedId  Int?
+  description String?
+  user    User?  @relation(fields: [userId], references: [id])
+  feed    Feed? @relation(fields: [feedId], references: [id])
+
+  @@map("feed_likes")
+}
+
+model FeedView {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  userId      Int?
+  feedId  Int?
+  description String?
+  user    User?  @relation(fields: [userId], references: [id])
+  feed    Feed? @relation(fields: [feedId], references: [id])
+
+  @@map("feed_views")
 }
 
 model CampaignComment {
@@ -55,10 +104,11 @@ model CampaignComment {
   userId      Int?
   campaignId  Int?
   description String?
-  profile     Profile?  @relation(fields: [userId], references: [id])
+  user     User?  @relation(fields: [userId], references: [id])
   campaign    Campaign? @relation(fields: [campaignId], references: [id])
 
   @@map("campaign_comments")
+  Profile Profile[]
 }
 
 model CampaignContributor {
@@ -69,10 +119,11 @@ model CampaignContributor {
   userId      Int?
   money       Decimal?  @default(0)
   isAnonymous Boolean?  @default(false)
-  profile     Profile?  @relation(fields: [userId], references: [id])
+  user     User?  @relation(fields: [userId], references: [id])
   campaign    Campaign? @relation(fields: [campaignId], references: [id])
-
+  Profile Profile[]
   @@map("campaign_contributors")
+  
 }
 
 model CampaignDocument {
@@ -83,10 +134,11 @@ model CampaignDocument {
   campaignId   Int?
   userId       Int?
   isApproved   Boolean?  @default(false)
-  profile      Profile?  @relation(fields: [userId], references: [id])
+  user      User?  @relation(fields: [userId], references: [id])
   campaign     Campaign? @relation(fields: [campaignId], references: [id])
 
   @@map("campaign_documents")
+  Profile Profile[]
 }
 
 model CampaignMidia {
@@ -97,10 +149,11 @@ model CampaignMidia {
   campaignId Int?
   midiaUrl   String?
   midiaType  String    @default("image")
-  profile    Profile?  @relation(fields: [userId], references: [id])
+  user    User?  @relation(fields: [userId], references: [id])
   campaign   Campaign? @relation(fields: [campaignId], references: [id])
 
   @@map("campaign_midias")
+  Profile Profile[]
 }
 
 model CampaignUpdate {
@@ -111,10 +164,11 @@ model CampaignUpdate {
   description String?
   campaignId  Int?
   userId      Int?
-  profile     Profile?  @relation(fields: [userId], references: [id])
+  user     User?  @relation(fields: [userId], references: [id])
   campaign    Campaign? @relation(fields: [campaignId], references: [id])
 
   @@map("campaign_updates")
+  Profile Profile[]
 }
 
 model Campaign {
@@ -131,12 +185,10 @@ model Campaign {
   numberOfContributions Int?
   ongId                 Int?
   phoneNumber           String?
-  priority              Int?                  @default(0)
   endDate               DateTime?
   title                 String?
   userId             Int?
   startDate             DateTime?
-  isUrgent              Boolean?              @default(false)
   isActivate            Boolean?              @default(true)
   beneficiaryName       String?
   campaignType          String?
@@ -173,9 +225,10 @@ model Community {
   description String?
   image       String?
   banner      String?
-  profile     Profile? @relation(fields: [userId], references: [id])
+  user     User? @relation(fields: [userId], references: [id])
 
   @@map("communities")
+  Profile Profile[]
 }
 
 model Event {
@@ -184,16 +237,19 @@ model Event {
   userId             Int?
   title              String?
   location           String?
+  latitude           Decimal?
+  longitude          Decimal?
   description        String?
   backgroundImageUrl String?
   startDate          DateTime?
   endDate            DateTime?
   createdAt          DateTime? @default(now())
   updatedAt          DateTime? @updatedAt
-  profile            Profile?  @relation(fields: [userId], references: [id])
+  user            User?  @relation(fields: [userId], references: [id])
   ong                Ong?      @relation(fields: [ongId], references: [id])
 
   @@map("events")
+  Profile Profile[]
 }
 
 model Favorite {
@@ -209,16 +265,22 @@ model Favorite {
 }
 
 model Feed {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
+ id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  description String?
   userId      Int?
   ongId       Int?
+  title       String?
   image       String?
-  description String?
-  profile     Profile? @relation(fields: [userId], references: [id])
-  ong         Ong?     @relation(fields: [ongId], references: [id])
+  user     User?  @relation(fields: [userId], references: [id])
+  ong         Ong?      @relation(fields: [ongId], references: [id])
 
-  @@map("feeds")
+  @@map("feeds")  
+  FeedComment FeedComment[]
+  Profile Profile[]
+  FeedLike FeedLike[]
+  FeedView FeedView[]
 }
 
 model Notification {
@@ -307,14 +369,15 @@ model Profile {
   createdAt            DateTime?             @default(now())
   updatedAt            DateTime?             @updatedAt
   location             String?
+  latitude             Decimal
+  longitude            Decimal
   isVerified           Boolean?              @default(false)
   role                 String?
   donationQtd          BigInt?               @default(0)
   campaignQtd          BigInt?               @default(0)
   lastName             String?
   fullName             String?
-  phoneNumber          String?
-  blogs                Blog[]
+  phoneNumber          String?  
   campaignComments     CampaignComment[]
   campaignContributors CampaignContributor[]
   campaignDocuments    CampaignDocument[]

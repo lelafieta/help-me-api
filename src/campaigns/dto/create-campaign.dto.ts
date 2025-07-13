@@ -42,10 +42,6 @@ export class CreateCampaignDto {
   phoneNumber?: string;
 
   @IsOptional()
-  @IsNumber()
-  priority?: number;
-
-  @IsOptional()
   @IsDate()
   endDate?: Date;
 

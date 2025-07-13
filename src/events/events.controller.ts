@@ -46,6 +46,12 @@ export class EventsController {
     return this.eventsService.findOne(Number(id));
   }
 
+  @Get('/nearby')
+  getNearbyEvents(@Req() req) {
+    return this.eventsService.findNearbyEventsSmart(req.user.id);
+  }
+
+
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -53,6 +59,12 @@ export class EventsController {
   ) {
     return this.eventsService.update(Number(id), updateEventDto);
   }
+
+  @Get('for-you')
+  getEventsForYou(@Req() req) {
+    return this.eventsService.findForYouEvents(req.user.id);
+  }
+
 
   @Delete(':id')
   remove(@Param('id') id: string) {

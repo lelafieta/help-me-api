@@ -34,6 +34,8 @@ export class OngsController {
     return this.ongsService.findOne(Number(id));
   }
 
+  
+
   @Patch(':id')
   update(
     @Param('id') id: string,

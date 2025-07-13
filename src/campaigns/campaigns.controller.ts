@@ -94,13 +94,18 @@ export class CampaignsController {
 
   @Get('/category/:id')
   findCampaignByCategoryId(@Param('id') id: string) {
-    
+
     return this.campaignsService.findCampaignByCategoryId(Number(id));
   }
 
   @Get('my-campaigns/:status')
   getMyCampaignsByStatus(@Req() req, @Param('status') status: string) {
     return this.campaignsService.findMyCampaignsByStatus(req.user.id, status);
+  }
+
+  @Get('smart-urgent')
+  getSmartUrgent(@Req() req) {
+    return this.campaignsService.findUrgentCampaignsSmart(req.user.id);
   }
 
 
