@@ -68,6 +68,7 @@ export class CampaignsService {
           isUrgent: Boolean(dto.isUrgent),
           isActivate: Boolean(dto.isActivate),
           userId: Number(dto.userId),
+          status: dto.status !== undefined ? String(dto.status) : undefined,
           campaignDocuments: {
             connect: createdDocuments.map((doc) => ({ id: doc.id })),
           },
@@ -163,9 +164,10 @@ export class CampaignsService {
     });
   }
 
-  update(id: number, updateCampaignDto: UpdateCampaignDto) {
+  update(id: number, updateCampaignDto: UpdateCampaignDto) {    
     
     const data: any = { ...updateCampaignDto };
+    
     if (data.categoryId !== undefined) {
       data.categoryId = Number(data.categoryId);
     }
@@ -178,6 +180,7 @@ export class CampaignsService {
     if (data.fundraisingGoal !== undefined) {
       data.fundraisingGoal = Number(data.fundraisingGoal);
     }    
+    data.status = data.status !== undefined ? String(data.status) : undefined;
     return this.prisma.campaign.update({ where: { id }, data });
   }
 

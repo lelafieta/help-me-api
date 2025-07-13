@@ -109,7 +109,6 @@ export class CampaignsController {
     @Param('id') id: string,
     @Body() updateCampaignDto: UpdateCampaignDto,
   ) {
-   
     return this.campaignsService.update(Number(id), updateCampaignDto);
   }
 
