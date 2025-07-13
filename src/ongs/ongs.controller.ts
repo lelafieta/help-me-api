@@ -17,7 +17,7 @@ import { AuthGuard } from '@nestjs/passport';
 @Controller('ongs')
 @UseGuards(AuthGuard('jwt'))
 export class OngsController {
-  constructor(private readonly ongsService: OngsService) {}
+  constructor(private readonly ongsService: OngsService) { }
 
   @Post()
   create(@Body() createOngDto: CreateOngDto) {
@@ -34,7 +34,11 @@ export class OngsController {
     return this.ongsService.findOne(Number(id));
   }
 
-  
+  @Get('popular')
+  getPopularOngs() {
+    return this.ongsService.findPopularOngs();
+  }
+
 
   @Patch(':id')
   update(

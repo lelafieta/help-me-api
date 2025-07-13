@@ -12,6 +12,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { PrismaModule } from './database/prisma.module';
 import { ProfilesModule } from './profiles/profiles.module';
+import { FeedsModule } from './feeds/feeds.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { ProfilesModule } from './profiles/profiles.module';
     FavoritesModule,
     BlogsModule,
     PrismaModule,
-    ProfilesModule,    
+    ProfilesModule,
+    FeedsModule,    
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
