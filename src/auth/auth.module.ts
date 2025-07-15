@@ -12,7 +12,7 @@ import { PrismaModule } from 'src/database/prisma.module';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'supersecret',
-      signOptions: { expiresIn: '1440m' },
+      signOptions: { expiresIn: '86400m' },
     }),
   ],
   controllers: [AuthController],

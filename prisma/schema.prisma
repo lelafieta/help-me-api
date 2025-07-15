@@ -38,7 +38,11 @@ model User {
   Community Community[]
   Event Event[]
   FeedLike FeedLike[]
-  FeedView FeedView[]
+  FeedView FeedView[]  
+  Comment Comment[]
+  Resource Resource[]
+  CommunityMember CommunityMember[]
+  Post Post[]
   @@map("users")  
 }
 
@@ -214,22 +218,97 @@ model Category {
   createdAt   DateTime   @default(now())
   campaigns   Campaign[]
 
+  
+  Community Community[]
   @@map("categories")
 }
 
 model Community {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  userId      Int?
-  name        String?
+  id          Int           @id @default(autoincrement())
+  name        String
   description String?
-  image       String?
-  banner      String?
-  user     User? @relation(fields: [userId], references: [id])
+  location    String?
+  imageUrl    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  @@map("communities")
+  ownerId     Int
+  owner       User          @relation(fields: [ownerId], references: [id])
+
+  members     CommunityMember[]
+  posts       Post[]
+  events      Event[]
+  resources   Resource[]
+  categories  Category[]
   Profile Profile[]
+
+  @@map("communities")  
 }
+
+model CommunityMember {
+  id           Int        @id @default(autoincrement())
+  role         String     // ex: "admin", "member", "moderator"
+  joinedAt     DateTime   @default(now())
+
+  userId       Int
+  communityId  Int
+
+  user         User       @relation(fields: [userId], references: [id])
+  community    Community  @relation(fields: [communityId], references: [id])
+
+  @@unique([userId, communityId])
+  @@map("community_members")
+}
+
+model Resource {
+  id           Int       @id @default(autoincrement())
+  title        String
+  type         String    // ex: "pdf", "image", "link"
+  url          String
+  uploadedAt   DateTime  @default(now())
+
+  communityId  Int
+  uploaderId   Int
+
+  community    Community @relation(fields: [communityId], references: [id])
+  uploader     User      @relation(fields: [uploaderId], references: [id])
+  @@map("resources")
+}
+
+
+
+model Post {
+  id           Int       @id @default(autoincrement())
+  title        String
+  content      String
+  imageUrl     String?
+  createdAt    DateTime  @default(now())
+
+  authorId     Int?
+  communityId  Int?
+  ongId        Int?
+
+  author       User?      @relation(fields: [authorId], references: [id])
+  community    Community? @relation(fields: [communityId], references: [id])
+  ong          Ong?       @relation(fields: [ongId], references: [id])
+
+  comments     Comment[]
+  @@map("posts")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  postId    Int
+  userId    Int
+
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  @@map("comments")
+}
+
 
 model Event {
   id                 Int       @id @default(autoincrement())
@@ -246,10 +325,10 @@ model Event {
   createdAt          DateTime? @default(now())
   updatedAt          DateTime? @updatedAt
   user            User?  @relation(fields: [userId], references: [id])
-  ong                Ong?      @relation(fields: [ongId], references: [id])
-
-  @@map("events")
+  ong                Ong?      @relation(fields: [ongId], references: [id])  
   Profile Profile[]
+  Community Community[]
+  @@map("events")
 }
 
 model Favorite {
@@ -276,11 +355,12 @@ model Feed {
   user     User?  @relation(fields: [userId], references: [id])
   ong         Ong?      @relation(fields: [ongId], references: [id])
 
-  @@map("feeds")  
+  
   FeedComment FeedComment[]
   Profile Profile[]
   FeedLike FeedLike[]
   FeedView FeedView[]
+  @@map("feeds")  
 }
 
 model Notification {
@@ -324,6 +404,7 @@ model Ong {
   ongsDocuments   OngsDocument[]
 
   @@map("ongs")
+  Post Post[]
 }
 
 model OngsDocument {

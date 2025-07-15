@@ -5,6 +5,7 @@ import {
   UseGuards,
   Get,
   Request,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -20,11 +21,13 @@ export class AuthController {
     return this.authService.register(createAuthDto);
   }
 
+  @HttpCode(200)
   @Post('login')
   async login(@Body() loginAuthDto: LoginAuthDto) {
     return this.authService.login(loginAuthDto);
   }
 
+  @HttpCode(200)
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   getProfile(@Request() req) {    
