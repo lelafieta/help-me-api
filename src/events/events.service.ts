@@ -31,6 +31,8 @@ export class EventsService {
         title: createEventDto.title,
         location: createEventDto.location,
         description: createEventDto.description,
+        communityId: Number(createEventDto.communityId),
+
         startDate: createEventDto.startDate ? new Date(createEventDto.startDate) : undefined,
         endDate: createEventDto.endDate ? new Date(createEventDto.endDate) : undefined,
         backgroundImageUrl,

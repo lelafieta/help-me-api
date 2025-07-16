@@ -81,4 +81,8 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
+
+  async getProfile(userId: number) {
+    return this.prisma.profile.findUnique({ where: { id: userId } });
+  }
 }

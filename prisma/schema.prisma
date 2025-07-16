@@ -44,6 +44,8 @@ model User {
   CommunityMember CommunityMember[]
   Post Post[]
   @@map("users")  
+  Message Message[]
+  ChatMember ChatMember[]
 }
 
 model Blog {
@@ -326,10 +328,53 @@ model Event {
   updatedAt          DateTime? @updatedAt
   user            User?  @relation(fields: [userId], references: [id])
   ong                Ong?      @relation(fields: [ongId], references: [id])  
-  Profile Profile[]
-  Community Community[]
+  Profile Profile[]  
+  communityId  Int
+  community    Community @relation(fields: [communityId], references: [id])
   @@map("events")
 }
+
+
+model ChatRoom {
+  id           Int       @id @default(autoincrement())
+  isGroup      Boolean   @default(false)
+  name         String?   // usado apenas para grupos
+  createdAt    DateTime  @default(now())
+
+  members      ChatMember[]
+  messages     Message[]
+
+  @@map("chat_rooms")
+}
+
+model ChatMember {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  chatRoomId Int
+  joinedAt   DateTime  @default(now())
+
+  user       User      @relation(fields: [userId], references: [id])
+  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id])
+
+  @@unique([userId, chatRoomId])
+
+  @@map("chat_members")
+}
+
+model Message {
+  id         Int       @id @default(autoincrement())
+  content    String
+  sentAt     DateTime  @default(now())
+
+  senderId   Int
+  chatRoomId Int
+
+  sender     User      @relation(fields: [senderId], references: [id])
+  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id])
+
+  @@map("messages")
+}
+
 
 model Favorite {
   id        Int       @id @default(autoincrement())
@@ -450,8 +495,8 @@ model Profile {
   createdAt            DateTime?             @default(now())
   updatedAt            DateTime?             @updatedAt
   location             String?
-  latitude             Decimal
-  longitude            Decimal
+  latitude             Decimal?
+  longitude            Decimal?
   isVerified           Boolean?              @default(false)
   role                 String?
   donationQtd          BigInt?               @default(0)
