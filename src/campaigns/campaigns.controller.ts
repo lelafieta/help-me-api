@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   BadRequestException,
   HttpCode,
+  Request,
   Req,
 } from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
@@ -85,7 +86,10 @@ export class CampaignsController {
     return this.campaignsService.findCampaignsByUserId(Number(userId));
   }
 
-
+  @Get('/smart-urgent')
+  getSmartUrgent(@Request() req) {   
+    return this.campaignsService.findUrgentCampaignsSmart(req.user.id);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -103,10 +107,6 @@ export class CampaignsController {
     return this.campaignsService.findMyCampaignsByStatus(req.user.id, status);
   }
 
-  @Get('smart-urgent')
-  getSmartUrgent(@Req() req) {
-    return this.campaignsService.findUrgentCampaignsSmart(req.user.id);
-  }
 
 
   @Patch(':id')

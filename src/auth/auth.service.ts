@@ -12,7 +12,7 @@ export class AuthService {
     private prisma: PrismaService,
   ) { }
   async register(createAuthDto: CreateAuthDto) {
-    const { name, email, password, phone } = createAuthDto;
+    const { firstName, lastName, email, password, phone } = createAuthDto;
 
     const existingUser = await this.prisma.user.findUnique({ where: { email } });
 
@@ -22,18 +22,17 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✂️ Divide o nome completo
-    const nameParts = name.trim().split(' ');
-    const firstName = nameParts[0];
-    const lastName = nameParts.slice(1).join(' ') || null;
 
     // 1️⃣ Cria o usuário
     const user = await this.prisma.user.create({
       data: {
         email,
-        name,
+        firstName: firstName,
+        lastName: lastName,
+        fullName: `${firstName} ${lastName}`,
         phone,
         roleName: "user",
+        avatarUrl: createAuthDto.avatarUrl,
         password: hashedPassword,
       },
     });
@@ -44,10 +43,11 @@ export class AuthService {
         id: user.id,
         email: email,
         phoneNumber: phone,
-        fullName: name,
+        fullName: `${firstName} ${lastName}`,
         firstName: firstName,
         lastName: lastName,
         role: 'user',
+        avatarUrl: createAuthDto.avatarUrl,
         latitude: 0, // or provide a default/actual value
         longitude: 0, // or provide a default/actual value
       },
@@ -79,10 +79,17 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email };
     return {
       access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+      },
     };
   }
 
   async getProfile(userId: number) {
-    return this.prisma.profile.findUnique({ where: { id: userId } });
+    return this.prisma.profile.findUnique({ where: { id: userId }, include: { user: true } });
   }
 }

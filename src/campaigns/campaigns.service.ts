@@ -55,7 +55,7 @@ export class CampaignsService {
           description: dto.description,
           fundraisingGoal: Number(dto.fundraisingGoal),
           imageCoverUrl: `/uploads/campaign_image_cover/${cover.filename}`, // 📌 Caminho da capa
-          location: dto.location,          
+          location: dto.location,
           categoryId: Number(dto.categoryId),
           ongId: Number(dto.ongId),
           phoneNumber: dto.phoneNumber,
@@ -64,7 +64,7 @@ export class CampaignsService {
           currency: dto.currency ?? 'AOA',
           startDate: dto.startDate ? new Date(dto.startDate) : null,
           endDate: dto.endDate ? new Date(dto.endDate) : null,
-          birth: dto.birth ? new Date(dto.birth) : null,          
+          birth: dto.birth ? new Date(dto.birth) : null,
           isActivate: Boolean(dto.isActivate),
           userId: Number(dto.userId),
           status: dto.status !== undefined ? String(dto.status) : undefined,
@@ -188,6 +188,12 @@ export class CampaignsService {
   }
 
   async findUrgentCampaignsSmart(userId?: number, limit = 10) {
+    
+    if (!userId) {
+      console.trace('ID não fornecido a findOne');
+      throw new BadRequestException('ID da campanha é obrigatório');
+    }
+
     const profile = userId
       ? await this.prisma.profile.findFirst({ where: { id: userId } })
       : null;
