@@ -20,7 +20,10 @@ export class CommunitiesService {
   }
 
   update(id: number, updateCommunityDto: UpdateCommunityDto) {
-    return this.prisma.community.update({ where: { id }, data: updateCommunityDto });
+    return this.prisma.community.update({
+      where: { id },
+      data: updateCommunityDto,
+    });
   }
 
   remove(id: number) {

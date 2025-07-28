@@ -16,7 +16,9 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsString({ message: 'A localização deve ser um texto.' })
-  @MaxLength(150, { message: 'A localização pode ter no máximo 150 caracteres.' })
+  @MaxLength(150, {
+    message: 'A localização pode ter no máximo 150 caracteres.',
+  })
   location?: string;
 
   @IsOptional()

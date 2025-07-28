@@ -6,6 +6,6 @@ import { EventsController } from './events.controller';
 @Module({
   imports: [PrismaModule],
   providers: [EventsService],
-  controllers: [EventsController]
+  controllers: [EventsController],
 })
 export class EventsModule {}

@@ -1,4 +1,3 @@
-
 import {
   Controller,
   Get,
@@ -10,8 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Prisma } from 'generated/prisma';
 

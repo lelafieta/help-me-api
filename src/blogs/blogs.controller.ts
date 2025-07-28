@@ -1,4 +1,3 @@
-
 import {
   Controller,
   Get,
@@ -18,20 +17,18 @@ import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Multer } from 'multer';
 
 @Controller('blogs')
 @UseGuards(AuthGuard('jwt'))
 export class BlogsController {
-  constructor(private readonly blogsService: BlogsService) { }
+  constructor(private readonly blogsService: BlogsService) {}
 
   @HttpCode(200)
   @Post()
   @UseInterceptors(FileInterceptor('image')) // <- "image" é o nome do campo no form
   create(
     @Body() createBlogDto: CreateBlogDto,
-    @UploadedFile() file: Multer.File,
-    @Req() req
+    @UploadedFile() file: Express.Multer.File,
   ) {
     return this.blogsService.create(createBlogDto, file);
   }
@@ -53,16 +50,12 @@ export class BlogsController {
   }
 
   @Get('for-you')
-  getForYouBlogs(@Req() req) {
+  getForYouBlogs(@Req() req: { user: { id: number } }) {
     return this.blogsService.findForYouBlogs(req.user.id);
   }
 
-
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateBlogDto: UpdateBlogDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
     return this.blogsService.update(Number(id), updateBlogDto);
   }
 

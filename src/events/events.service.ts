@@ -4,13 +4,18 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { join } from 'path';
 import * as fs from 'fs';
-import { Multer } from 'multer';
+import { Event, Profile } from '@prisma/client';
+// import { Multer } from 'multer';
 
 @Injectable()
 export class EventsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-  async create(createEventDto: CreateEventDto, file: Multer.File, userId: number) {
+  async create(
+    createEventDto: CreateEventDto,
+    file: Express.Multer.File,
+    userId: number,
+  ) {
     let backgroundImageUrl: string | undefined;
 
     if (file) {
@@ -33,28 +38,36 @@ export class EventsService {
         description: createEventDto.description,
         communityId: Number(createEventDto.communityId),
 
-        startDate: createEventDto.startDate ? new Date(createEventDto.startDate) : undefined,
-        endDate: createEventDto.endDate ? new Date(createEventDto.endDate) : undefined,
+        startDate: createEventDto.startDate
+          ? new Date(createEventDto.startDate)
+          : undefined,
+        endDate: createEventDto.endDate
+          ? new Date(createEventDto.endDate)
+          : undefined,
         backgroundImageUrl,
       },
     });
-
   }
 
   findAll() {
     return this.prisma.event.findMany();
   }
 
-  getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  getDistanceKm(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const R = 6371; // Raio da Terra em KM
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) *
-      Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -87,7 +100,7 @@ export class EventsService {
     });
 
     const nearby = events
-      .map(event => {
+      .map((event) => {
         const dist = this.getDistanceKm(
           Number(profile.latitude),
           Number(profile.longitude),
@@ -96,13 +109,13 @@ export class EventsService {
         );
         return { ...event, distanceKm: dist };
       })
-      .filter(e => e.distanceKm <= radiusKm)
+      .filter((e) => e.distanceKm <= radiusKm)
       .sort((a, b) => a.distanceKm - b.distanceKm);
 
     return nearby;
   }
 
-  calculateEventRelevance(event: any, profile?: any): number {
+  calculateEventRelevance(event: any, profile?: Profile | null): number {
     const now = new Date();
     const start = new Date(event.startDate);
     const daysUntil = (start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
@@ -125,7 +138,7 @@ export class EventsService {
     const relevantTypes = ['doação', 'limpeza', 'saúde', 'comunidade'];
     if (
       event.title &&
-      relevantTypes.some(type => event.title.toLowerCase().includes(type))
+      relevantTypes.some((type) => event.title.toLowerCase().includes(type))
     ) {
       score += 1;
     }
@@ -151,18 +164,16 @@ export class EventsService {
       },
     });
 
-    const scored = events.map(e => ({
+    const scored = events.map((e) => ({
       ...e,
       relevanceScore: this.calculateEventRelevance(e, profile),
     }));
 
     return scored
-      .filter(e => e.relevanceScore >= 2)
+      .filter((e) => e.relevanceScore >= 2)
       .sort((a, b) => b.relevanceScore - a.relevanceScore)
       .slice(0, limit);
   }
-
-
 
   findOne(id: number) {
     return this.prisma.event.findUnique({ where: { id } });

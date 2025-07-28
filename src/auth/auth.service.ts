@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -10,18 +14,19 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     private prisma: PrismaService,
-  ) { }
+  ) {}
   async register(createAuthDto: CreateAuthDto) {
     const { firstName, lastName, email, password, phone } = createAuthDto;
 
-    const existingUser = await this.prisma.user.findUnique({ where: { email } });
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
     if (existingUser) {
       throw new ConflictException('Email já está em uso');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
 
     // 1️⃣ Cria o usuário
     const user = await this.prisma.user.create({
@@ -31,7 +36,7 @@ export class AuthService {
         lastName: lastName,
         fullName: `${firstName} ${lastName}`,
         phone,
-        roleName: "user",
+        roleName: 'user',
         avatarUrl: createAuthDto.avatarUrl,
         password: hashedPassword,
       },
@@ -60,8 +65,6 @@ export class AuthService {
     };
   }
 
-
-
   async login(loginAuthDto: LoginAuthDto) {
     const { email } = loginAuthDto;
 
@@ -71,7 +74,10 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const isPasswordValid = await bcrypt.compare(loginAuthDto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      loginAuthDto.password,
+      user.password,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
@@ -90,6 +96,9 @@ export class AuthService {
   }
 
   async getProfile(userId: number) {
-    return this.prisma.profile.findUnique({ where: { id: userId }, include: { user: true } });
+    return this.prisma.profile.findUnique({
+      where: { id: userId },
+      include: { user: true },
+    });
   }
 }

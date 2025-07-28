@@ -30,8 +30,7 @@ export class AuthController {
   @HttpCode(200)
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
-  getProfile(@Request() req) {    
-    
+  getProfile(@Request() req: { user: { id: string } }) {
     return this.authService.getProfile(Number(req.user.id));
   }
 }

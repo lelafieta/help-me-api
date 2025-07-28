@@ -1,4 +1,3 @@
-
 import {
   Controller,
   Get,
@@ -18,20 +17,19 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Multer } from 'multer';
 
 @Controller('events')
 @UseGuards(AuthGuard('jwt'))
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) { }
+  constructor(private readonly eventsService: EventsService) {}
 
   @HttpCode(200)
   @Post()
   @UseInterceptors(FileInterceptor('backgroundImageUrl'))
   create(
     @Body() createEventDto: CreateEventDto,
-    @UploadedFile() file: Multer.File,
-    @Req() req
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: { user: { id: number } },
   ) {
     return this.eventsService.create(createEventDto, file, req.user.id);
   }
@@ -47,24 +45,19 @@ export class EventsController {
   }
 
   @Get('/nearby')
-  getNearbyEvents(@Req() req) {
+  getNearbyEvents(@Req() req: { user: { id: number } }) {
     return this.eventsService.findNearbyEventsSmart(req.user.id);
   }
 
-
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateEventDto: UpdateEventDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
     return this.eventsService.update(Number(id), updateEventDto);
   }
 
   @Get('for-you')
-  getEventsForYou(@Req() req) {
+  getEventsForYou(@Req() req: { user: { id: number } }) {
     return this.eventsService.findForYouEvents(req.user.id);
   }
-
 
   @Delete(':id')
   remove(@Param('id') id: string) {

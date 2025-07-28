@@ -4,8 +4,8 @@ import { OngsController } from './ongs.controller';
 import { OngsService } from './ongs.service';
 
 @Module({
-      imports: [PrismaModule],
-      controllers: [OngsController],
-      providers: [OngsService],
+  imports: [PrismaModule],
+  controllers: [OngsController],
+  providers: [OngsService],
 })
 export class OngsModule {}

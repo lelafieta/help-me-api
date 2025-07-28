@@ -4,15 +4,16 @@ import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
 import { Prisma } from 'generated/prisma';
 import { Multer } from 'multer';
+import { CampaignContributorResponseDto } from './dto/create-contributor-campaign';
 
 @Injectable()
 export class CampaignsService {
   constructor(private prisma: PrismaService) { }
   async create(
     dto: CreateCampaignDto,
-    documents: Multer.File[],
-    midias: Multer.File[],
-    cover: Multer.File, // 📌 Novo parâmetro para a imagem de capa
+    documents: Express.Multer.File[],
+    midias: Express.Multer.File[],
+    cover: Express.Multer.File, // 📌 Novo parâmetro para a imagem de capa
   ) {
     // 0️⃣ Validação mínima antes de tudo
     if (!cover || !documents?.length || !midias?.length) {
@@ -54,7 +55,7 @@ export class CampaignsService {
           title: dto.title,
           description: dto.description,
           fundraisingGoal: Number(dto.fundraisingGoal),
-          imageCoverUrl: `/uploads/campaign_image_cover/${cover.filename}`, // 📌 Caminho da capa
+          imageCoverUrl: `/uploads/campaign_midias/${cover.filename}`, // 📌 Caminho da capa
           location: dto.location,
           categoryId: Number(dto.categoryId),
           ongId: Number(dto.ongId),
@@ -85,6 +86,29 @@ export class CampaignsService {
 
   findAll() {
     return this.prisma.campaign.findMany({
+      include: {
+        category: true,
+        ong: true,
+        user: true,
+        campaignDocuments: true,
+        campaignMidias: true,
+        campaignUpdates: true,
+        campaignContributors: true,
+        campaignComments: true,
+      },
+    });
+  }
+
+  createCampaignContributor(createContributorDto: CampaignContributorResponseDto) {
+    return this.prisma.campaignContributor.create({ data: createContributorDto });
+  }
+
+  getAllCampaignContributor(campaignId: number) {
+    // Não terminei de implementar
+    return this.prisma.campaign.findMany({
+      where: {
+        userId: campaignId,
+      },
       include: {
         category: true,
         ong: true,
@@ -141,7 +165,11 @@ export class CampaignsService {
         campaignDocuments: true,
         campaignMidias: true,
         campaignUpdates: true,
-        campaignContributors: true,
+        campaignContributors: {
+          include: {
+            user: true
+          }
+        },
         campaignComments: true,
       },
     });
@@ -187,7 +215,7 @@ export class CampaignsService {
     return this.prisma.campaign.delete({ where: { id } });
   }
 
-  async findUrgentCampaignsSmart(userId?: number, limit = 10) {
+  async findUrgentCampaignsSmart(userId?: number, limit = 10) {    
     
     if (!userId) {
       console.trace('ID não fornecido a findOne');
@@ -205,8 +233,18 @@ export class CampaignsService {
         endDate: { gte: new Date() }, // ainda válidas
       },
       include: {
-        ong: true,
         category: true,
+        ong: true,
+        user: true,
+        campaignDocuments: true,
+        campaignMidias: true,
+        campaignUpdates: true,
+        campaignContributors: {
+          include: {
+            user: true
+          }
+        },
+        campaignComments: true,
       },
     });
 
@@ -249,6 +287,4 @@ export class CampaignsService {
 
     return score;
   }
-
-
 }

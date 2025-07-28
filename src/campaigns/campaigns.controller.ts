@@ -1,4 +1,3 @@
-
 import {
   Controller,
   Get,
@@ -18,29 +17,31 @@ import {
 import { CampaignsService } from './campaigns.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
-import { Prisma } from 'generated/prisma';
-import { AnyFilesInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 import { extname } from 'path';
-import { Multer } from 'multer';
 import { diskStorage } from 'multer';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
 
 @Controller('campaigns')
 @UseGuards(AuthGuard('jwt'))
 export class CampaignsController {
-  constructor(private readonly campaignsService: CampaignsService) { }
+  constructor(private readonly campaignsService: CampaignsService) {}
 
   @HttpCode(200)
   @UseInterceptors(
     AnyFilesInterceptor({
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const ext = file.originalname.split('.').pop()?.toLowerCase();
+          const ext = file.originalname.split('.').pop()?.toLowerCase() ?? '';
+
           if (['jpg', 'jpeg', 'png'].includes(ext)) {
-            if (file.fieldname === 'cover') cb(null, './uploads/campaign_image_cover');
+            if (file.fieldname === 'cover')
+              cb(null, './uploads/campaign_image_cover');
             else cb(null, './uploads/campaign_midias');
-          } else if (['mp4', 'mov', 'avi', 'jpg', 'jpeg', 'png'].includes(ext)) {
+          } else if (
+            ['mp4', 'mov', 'avi', 'jpg', 'jpeg', 'png'].includes(ext)
+          ) {
             cb(null, './uploads/campaign_midias');
           } else if (['pdf', 'docx', 'txt'].includes(ext)) {
             cb(null, './uploads/campaign_documents');
@@ -55,24 +56,24 @@ export class CampaignsController {
       }),
     }),
   )
-
   @HttpCode(200)
   @Post()
   async createCampaign(
     @Body() dto: CreateCampaignDto,
-    @UploadedFiles() files: Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
     const cover = files.find((f) => f.fieldname === 'imageCoverUrl');
     const documents = files.filter((f) => f.fieldname === 'campaignDocuments');
     const midias = files.filter((f) => f.fieldname === 'campaignMidias');
 
     if (!cover || !documents.length || !midias.length) {
-      throw new BadRequestException('Capa, documentos e mídias são obrigatórios-' + cover + '-' + documents + '-' + midias + '');
+      throw new BadRequestException(
+        `Capa, documentos e mídias são obrigatórios. Cover: ${!!cover}, Documents: ${!!documents}, Midias: ${!!midias}`,
+      );
     }
 
     return this.campaignsService.create(dto, documents, midias, cover);
   }
-
 
   @HttpCode(200)
   @Get()
@@ -87,7 +88,7 @@ export class CampaignsController {
   }
 
   @Get('/smart-urgent')
-  getSmartUrgent(@Request() req) {   
+  getSmartUrgent(@Request() req: { user: { id: number } }) {
     return this.campaignsService.findUrgentCampaignsSmart(req.user.id);
   }
 
@@ -98,16 +99,16 @@ export class CampaignsController {
 
   @Get('/category/:id')
   findCampaignByCategoryId(@Param('id') id: string) {
-
     return this.campaignsService.findCampaignByCategoryId(Number(id));
   }
 
   @Get('my-campaigns/:status')
-  getMyCampaignsByStatus(@Req() req, @Param('status') status: string) {
+  getMyCampaignsByStatus(
+    @Req() req: { user: { id: number } },
+    @Param('status') status: string,
+  ) {
     return this.campaignsService.findMyCampaignsByStatus(req.user.id, status);
   }
-
-
 
   @Patch(':id')
   update(

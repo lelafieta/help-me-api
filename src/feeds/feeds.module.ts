@@ -6,6 +6,6 @@ import { PrismaModule } from 'src/database/prisma.module';
 @Module({
   controllers: [FeedsController],
   providers: [FeedsService],
-  imports: [PrismaModule]
+  imports: [PrismaModule],
 })
 export class FeedsModule {}

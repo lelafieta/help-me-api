@@ -13,9 +13,16 @@ import { BlogsModule } from './blogs/blogs.module';
 import { PrismaModule } from './database/prisma.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { FeedsModule } from './feeds/feeds.module';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { CampaignContributorsModule } from './campaign-contributors/campaign-contributors.module';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads', // agora acessa via http://localhost:3000/uploads/...
+    }),
     AuthModule,
     CampaignsModule,
     EventsModule,
@@ -26,7 +33,8 @@ import { FeedsModule } from './feeds/feeds.module';
     BlogsModule,
     PrismaModule,
     ProfilesModule,
-    FeedsModule,    
+    FeedsModule,
+    CampaignContributorsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

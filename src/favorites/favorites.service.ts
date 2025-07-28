@@ -19,7 +19,10 @@ export class FavoritesService {
   }
 
   update(id: number, updateFavoriteDto: Prisma.FavoriteUpdateInput) {
-    return this.prisma.favorite.update({ where: { id }, data: updateFavoriteDto });
+    return this.prisma.favorite.update({
+      where: { id },
+      data: updateFavoriteDto,
+    });
   }
 
   remove(id: number) {

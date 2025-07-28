@@ -20,7 +20,9 @@ export class CreateCommunityDto {
 
   @IsOptional()
   @IsString({ message: 'A localização deve ser um texto.' })
-  @MaxLength(100, { message: 'A localização deve ter no máximo 100 caracteres.' })
+  @MaxLength(100, {
+    message: 'A localização deve ter no máximo 100 caracteres.',
+  })
   location?: string;
 
   @IsOptional()

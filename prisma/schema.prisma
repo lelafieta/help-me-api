@@ -9,7 +9,7 @@ datasource db {
 }
 
 model User {
-  id               Int            @id @default(autoincrement())
+  id          String   @id @default(uuid())
   email            String?        @unique
   phone            String?        @unique
   fullName         String?
@@ -56,8 +56,8 @@ model Blog {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
   description String?
-  userId      Int?
-  ongId       Int?
+  userId      String?
+  ongId       String?
   title       String?
   image       String?
   user     User?  @relation(fields: [userId], references: [id])
@@ -67,11 +67,11 @@ model Blog {
 }
 
 model FeedComment {
-  id          Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-  userId      Int?
-  feedId  Int?
+  userId      String?
+  feedId  String?
   description String?
   user    User?  @relation(fields: [userId], references: [id])
   feed    Feed? @relation(fields: [feedId], references: [id])
@@ -81,11 +81,11 @@ model FeedComment {
 
 
 model FeedLike {
-  id          Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-  userId      Int?
-  feedId  Int?
+  userId      String?
+  feedId  String?
   description String?
   user    User?  @relation(fields: [userId], references: [id])
   feed    Feed? @relation(fields: [feedId], references: [id])
@@ -94,11 +94,11 @@ model FeedLike {
 }
 
 model FeedView {
-  id          Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-  userId      Int?
-  feedId  Int?
+  userId      String?
+  feedId  String?
   description String?
   user    User?  @relation(fields: [userId], references: [id])
   feed    Feed? @relation(fields: [feedId], references: [id])
@@ -107,11 +107,11 @@ model FeedView {
 }
 
 model CampaignComment {
-  id          Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-  userId      Int?
-  campaignId  Int?
+  userId      String?
+  campaignId  String?
   description String?
   user     User?  @relation(fields: [userId], references: [id])
   campaign    Campaign? @relation(fields: [campaignId], references: [id])
@@ -121,11 +121,11 @@ model CampaignComment {
 }
 
 model CampaignContributor {
-  id          Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
-  campaignId  Int?
-  userId      Int?
+  campaignId  String?
+  userId      String?
   money       Decimal?  @default(0)
   isAnonymous Boolean?  @default(false)
   user     User?  @relation(fields: [userId], references: [id])
@@ -136,14 +136,14 @@ model CampaignContributor {
 }
 
 model CampaignDocument {
-  id           Int       @id @default(autoincrement())
+  id           String   @id @default(uuid())
   createdAt    DateTime  @default(now())
   documentPath String?
   updatedAt    DateTime? @updatedAt
-  campaignId   Int?
-  userId       Int?
+  campaignId   String?
+  userId       String?
   isApproved   Boolean?  @default(false)
-  user      User?  @relation(fields: [userId], references: [id])
+  user         User?  @relation(fields: [userId], references: [id])
   campaign     Campaign? @relation(fields: [campaignId], references: [id])
 
   @@map("campaign_documents")
@@ -151,11 +151,11 @@ model CampaignDocument {
 }
 
 model CampaignMidia {
-  id         Int       @id @default(autoincrement())
+  id         String   @id @default(uuid())
   createdAt  DateTime  @default(now())
   updatedAt  DateTime? @updatedAt
-  userId     Int?
-  campaignId Int?
+  userId     String?
+  campaignId String?
   midiaUrl   String?
   midiaType  String    @default("image")
   user    User?  @relation(fields: [userId], references: [id])
@@ -166,13 +166,13 @@ model CampaignMidia {
 }
 
 model CampaignUpdate {
-  id          Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
   title       String?
   description String?
-  campaignId  Int?
-  userId      Int?
+  campaignId  String?
+  userId      String?
   user     User?  @relation(fields: [userId], references: [id])
   campaign    Campaign? @relation(fields: [campaignId], references: [id])
 
@@ -181,10 +181,10 @@ model CampaignUpdate {
 }
 
 model Campaign {
-  id                    Int                   @id @default(autoincrement())
+  id          String   @id @default(uuid())
   createdAt             DateTime              @default(now())
   updatedAt             DateTime?             @updatedAt
-  categoryId            Int?
+  categoryId            String?
   description           String?
   fundraisingGoal       Float?
   fundsRaised           Float?
@@ -192,11 +192,11 @@ model Campaign {
   institution           String?
   location              String?
   numberOfContributions Int?
-  ongId                 Int?
+  ongId                 String?
   phoneNumber           String?
   endDate               DateTime?
   title                 String?
-  userId             Int?
+  userId                String?
   startDate             DateTime?
   isActivate            Boolean?              @default(true)
   beneficiaryName       String?
@@ -217,7 +217,7 @@ model Campaign {
 }
 
 model Category {
-  id          Int        @id @default(autoincrement())
+  id          String   @id @default(uuid())
   name        String     @unique
   description String?
   createdAt   DateTime   @default(now())
@@ -229,7 +229,7 @@ model Category {
 }
 
 model Community {
-  id          Int           @id @default(autoincrement())
+  id          String   @id @default(uuid())
   name        String
   description String?
   location    String?
@@ -237,7 +237,7 @@ model Community {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  ownerId     Int
+  ownerId     String
   owner       User          @relation(fields: [ownerId], references: [id])
 
   members     CommunityMember[]
@@ -251,12 +251,12 @@ model Community {
 }
 
 model CommunityMember {
-  id           Int        @id @default(autoincrement())
+  id          String   @id @default(uuid())
   role         String     // ex: "admin", "member", "moderator"
   joinedAt     DateTime   @default(now())
 
-  userId       Int
-  communityId  Int
+  userId       String
+  communityId  String
 
   user         User       @relation(fields: [userId], references: [id])
   community    Community  @relation(fields: [communityId], references: [id])
@@ -266,14 +266,14 @@ model CommunityMember {
 }
 
 model Resource {
-  id           Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   title        String
   type         String    // ex: "pdf", "image", "link"
   url          String
   uploadedAt   DateTime  @default(now())
 
-  communityId  Int
-  uploaderId   Int
+  communityId  String
+  uploaderId   String
 
   community    Community @relation(fields: [communityId], references: [id])
   uploader     User      @relation(fields: [uploaderId], references: [id])
@@ -283,15 +283,15 @@ model Resource {
 
 
 model Post {
-  id           Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   title        String
   content      String
   imageUrl     String?
   createdAt    DateTime  @default(now())
 
-  authorId     Int?
-  communityId  Int?
-  ongId        Int?
+  authorId     String?
+  communityId  String?
+  ongId        String?
 
   author       User?      @relation(fields: [authorId], references: [id])
   community    Community? @relation(fields: [communityId], references: [id])
@@ -302,12 +302,12 @@ model Post {
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   content   String
   createdAt DateTime @default(now())
 
-  postId    Int
-  userId    Int
+  postId    String
+  userId    String
 
   post      Post     @relation(fields: [postId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
@@ -316,9 +316,9 @@ model Comment {
 
 
 model Event {
-  id                 Int       @id @default(autoincrement())
-  ongId              Int?
-  userId             Int?
+  id                String   @id @default(uuid())
+  ongId              String?
+  userId             String?
   title              String?
   location           String?
   latitude           Decimal?
@@ -332,14 +332,14 @@ model Event {
   user            User?  @relation(fields: [userId], references: [id])
   ong                Ong?      @relation(fields: [ongId], references: [id])  
   Profile Profile[]  
-  communityId  Int
+  communityId  String
   community    Community @relation(fields: [communityId], references: [id])
   @@map("events")
 }
 
 
 model ChatRoom {
-  id           Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   isGroup      Boolean   @default(false)
   name         String?   // usado apenas para grupos
   createdAt    DateTime  @default(now())
@@ -351,9 +351,9 @@ model ChatRoom {
 }
 
 model ChatMember {
-  id         Int       @id @default(autoincrement())
-  userId     Int
-  chatRoomId Int
+  id          String   @id @default(uuid())
+  userId     String
+  chatRoomId String
   joinedAt   DateTime  @default(now())
 
   user       User      @relation(fields: [userId], references: [id])
@@ -365,12 +365,12 @@ model ChatMember {
 }
 
 model Message {
-  id         Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   content    String
   sentAt     DateTime  @default(now())
 
-  senderId   Int
-  chatRoomId Int
+  senderId   String
+  chatRoomId String
 
   sender     User      @relation(fields: [senderId], references: [id])
   chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id])
@@ -380,9 +380,9 @@ model Message {
 
 
 model Favorite {
-  id        Int       @id @default(autoincrement())
-  userId    Int?
-  itemId    Int
+  id          String   @id @default(uuid())
+  userId    String?
+  itemId    String
   itemType  String?
   createdAt DateTime? @default(now())
   updatedAt DateTime? @updatedAt
@@ -392,12 +392,12 @@ model Favorite {
 }
 
 model Feed {
- id          Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())  
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
   description String?
-  userId      Int?
-  ongId       Int?
+  userId      String?
+  ongId       String?
   title       String?
   image       String?
   user     User?  @relation(fields: [userId], references: [id])
@@ -412,8 +412,8 @@ model Feed {
 }
 
 model Notification {
-  id        Int       @id @default(autoincrement())
-  userId    Int?
+  id          String   @id @default(uuid())
+  userId    String?
   title     String
   message   String
   type      String
@@ -426,7 +426,7 @@ model Notification {
 }
 
 model Ong {
-  id              Int            @id @default(autoincrement())
+  id          String   @id @default(uuid())
   createdAt       DateTime       @default(now())
   updatedAt       DateTime?      @updatedAt
   about           String?
@@ -439,7 +439,7 @@ model Ong {
   profileImageUrl String?
   servicesNumber  Int?        @default(0)
   supportsNumber  Int?        @default(0)
-  userId          Int?
+  userId          String?
   vision          String?
   status          String         @default("pending")
   email           String?
@@ -457,8 +457,8 @@ model Ong {
 
 model OngsDocument {
   id                            String    @id @default(uuid())
-  userId                        Int?
-  ongId                         Int?
+  userId                        String?
+  ongId                         String?
   statutes_constitutive_act     String
   declaration_good_standing     String
   minutes_constitutive_assembly String
@@ -476,7 +476,7 @@ model OngsDocument {
 }
 
 model Payment {
-  id          Int       @id @default(autoincrement())
+  id          String   @id @default(uuid())
   status      String?
   signature   String?
   identifier  String?
@@ -490,7 +490,7 @@ model Payment {
 }
 
 model Profile {
-  id                   Int                   @id @default(autoincrement())
+  id          String   @id @default(uuid())
   firstName            String?
   email                String?               @unique
   avatarUrl            String?
@@ -522,8 +522,8 @@ model Profile {
 }
 
 model UserFcmToken {
-  id        Int       @id @default(autoincrement())
-  userId    Int?
+  id          String   @id @default(uuid())
+  userId    String?
   fcmToken  String    @unique
   createdAt DateTime? @default(now())
   user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -1,18 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FeedsService } from './feeds.service';
 import { CreateFeedDto } from './dto/create-feed.dto';
 import { UpdateFeedDto } from './dto/update-feed.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Multer } from 'multer';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 
-
 @Controller('feeds')
 @UseGuards(AuthGuard('jwt'))
 export class FeedsController {
-  constructor(private readonly feedsService: FeedsService) { }
+  constructor(private readonly feedsService: FeedsService) {}
 
   @HttpCode(200)
   @Post()
@@ -21,7 +31,8 @@ export class FeedsController {
       storage: diskStorage({
         destination: './uploads/feeds',
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           callback(null, `${uniqueSuffix}${ext}`);
         },
@@ -30,7 +41,7 @@ export class FeedsController {
   )
   create(
     @Body() createFeedDto: CreateFeedDto,
-    @UploadedFile() file: Multer.File,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     return this.feedsService.create(createFeedDto, file);
   }
@@ -55,5 +66,3 @@ export class FeedsController {
     return this.feedsService.remove(+id);
   }
 }
-
-

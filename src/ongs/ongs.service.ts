@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CreateOngDto } from './dto/create-ong.dto';
 import { UpdateOngDto } from './dto/update-ong.dto';
+import { Blog, Ong } from '@prisma/client';
 
 @Injectable()
 export class OngsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(createOngDto: CreateOngDto) {
-
     const data = {
       about: createOngDto.about,
       bio: createOngDto.bio,
@@ -29,12 +29,13 @@ export class OngsService {
     return this.prisma.ong.create({ data });
   }
 
-  calculateBlogFeaturedScore(blog: any): number {
+  calculateBlogFeaturedScore(blog: Blog & { ong: Ong | null }): number {
     let score = 0;
 
     const now = new Date();
     const createdAt = new Date(blog.createdAt);
-    const daysSinceCreated = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    const daysSinceCreated =
+      (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
 
     // Criado há menos de 7 dias
     if (daysSinceCreated <= 7) score += 2;
@@ -47,7 +48,8 @@ export class OngsService {
     const title = blog.title?.toLowerCase() ?? '';
     const description = blog.description?.toLowerCase() ?? '';
 
-    if (keywords.some(kw => title.includes(kw) || description.includes(kw))) score += 1;
+    if (keywords.some((kw) => title.includes(kw) || description.includes(kw)))
+      score += 1;
 
     return score;
   }
@@ -61,19 +63,20 @@ export class OngsService {
       },
     });
 
-    const scored = ongs.map(ong => ({
+    const scored = ongs.map((ong) => ({
       ...ong,
       popularityScore: this.calculateOngPopularity(ong),
     }));
 
     return scored
-      .filter(o => o.popularityScore >= 2)
+      .filter((o) => o.popularityScore >= 2)
       .sort((a, b) => b.popularityScore - a.popularityScore)
       .slice(0, limit);
   }
 
-
-  calculateOngPopularity(ong: any): number {
+  calculateOngPopularity(
+    ong: Ong & { campaigns: any[]; events: any[]; feeds: any[] },
+  ): number {
     let score = 0;
 
     if (ong.isVerified) score += 2;
@@ -86,9 +89,8 @@ export class OngsService {
     return score;
   }
 
-
   findAll() {
-    return this.prisma.ong.findMany();
+    return this.prisma.ong.findMany({ include: { user: true } });
   }
 
   findOne(id: number) {

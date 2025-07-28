@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsNumber, IsDate, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsDate,
+  IsBoolean,
+} from 'class-validator';
 
 export class CreateCampaignDto {
   @IsOptional()
@@ -83,5 +89,5 @@ export class CreateCampaignDto {
 
   @IsOptional()
   @IsString()
-  status?: String;
+  status?: string;
 }

@@ -20,7 +20,6 @@ export class CreateAuthDto {
   @IsEmail()
   email: string;
 
-
   @IsString()
   @IsNotEmpty()
   phone: string;

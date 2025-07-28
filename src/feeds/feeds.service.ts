@@ -2,13 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFeedDto } from './dto/create-feed.dto';
 import { UpdateFeedDto } from './dto/update-feed.dto';
 import { PrismaService } from 'src/database/prisma.service';
-import { Multer } from 'multer';
 
 @Injectable()
 export class FeedsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-  async create(createFeedDto: CreateFeedDto, file?: Multer.File) {
+  async create(createFeedDto: CreateFeedDto, file?: Express.Multer.File) {
     let imagePath: string | null = null;
 
     if (file) {
@@ -21,10 +20,9 @@ export class FeedsService {
         description: createFeedDto.description,
         image: imagePath,
         userId: Number(createFeedDto.userId), // 👈 conversão para número
-        ongId: Number(createFeedDto.ongId),   // 👈 conversão para número
+        ongId: Number(createFeedDto.ongId), // 👈 conversão para número
       },
     });
-
   }
 
   async findAll() {

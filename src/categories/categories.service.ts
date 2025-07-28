@@ -14,12 +14,15 @@ export class CategoriesService {
     return this.prisma.category.findMany();
   }
 
-  findOne(id: number) {
+  findOne(id: String) {
     return this.prisma.category.findUnique({ where: { id } });
   }
 
   update(id: number, updateCategoryDto: Prisma.CategoryUpdateInput) {
-    return this.prisma.category.update({ where: { id }, data: updateCategoryDto });
+    return this.prisma.category.update({
+      where: { id },
+      data: updateCategoryDto,
+    });
   }
 
   remove(id: number) {

@@ -1,4 +1,3 @@
-
 import {
   Controller,
   Get,
@@ -17,7 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 @Controller('ongs')
 @UseGuards(AuthGuard('jwt'))
 export class OngsController {
-  constructor(private readonly ongsService: OngsService) { }
+  constructor(private readonly ongsService: OngsService) {}
 
   @Post()
   create(@Body() createOngDto: CreateOngDto) {
@@ -39,12 +38,8 @@ export class OngsController {
     return this.ongsService.findPopularOngs();
   }
 
-
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateOngDto: UpdateOngDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateOngDto: UpdateOngDto) {
     return this.ongsService.update(Number(id), updateOngDto);
   }
 

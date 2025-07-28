@@ -4,7 +4,7 @@ import {
   IsBoolean,
   IsInt,
   IsUrl,
-  IsEmail
+  IsEmail,
 } from 'class-validator';
 
 export class CreateOngDto {
