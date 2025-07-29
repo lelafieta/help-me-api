@@ -332,8 +332,8 @@ model Event {
   user            User?  @relation(fields: [userId], references: [id])
   ong                Ong?      @relation(fields: [ongId], references: [id])  
   Profile Profile[]  
-  communityId  String
-  community    Community @relation(fields: [communityId], references: [id])
+  communityId  String?
+  community    Community? @relation(fields: [communityId], references: [id])
   @@map("events")
 }
 

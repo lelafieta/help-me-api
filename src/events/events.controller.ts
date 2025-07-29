@@ -39,15 +39,16 @@ export class EventsController {
     return this.eventsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.eventsService.findOne(id);
-  }
-
   @Get('/nearby')
   getNearbyEvents(@Req() req: { user: { id: string } }) {
     return this.eventsService.findNearbyEventsSmart(req.user.id);
   }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.eventsService.findOne(id);
+  }
+  
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {

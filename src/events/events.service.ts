@@ -37,7 +37,8 @@ export class EventsService {
         location: createEventDto.location,
         description: createEventDto.description,
         communityId: createEventDto.communityId,
-
+        latitude: Number(createEventDto.latitude),
+        longitude: Number(createEventDto.longitude),
         startDate: createEventDto.startDate
           ? new Date(createEventDto.startDate)
           : undefined,
@@ -85,7 +86,7 @@ export class EventsService {
     const events = await this.prisma.event.findMany({
       where: {
         endDate: {
-          gte: new Date(), // eventos ainda válidos
+          gte: new Date(),
         },
         latitude: {
           not: null,
@@ -96,14 +97,18 @@ export class EventsService {
       },
       include: {
         ong: true,
+        community: true,
+        user: true
       },
     });
 
     const nearby = events
       .map((event) => {
         const dist = this.getDistanceKm(
-          Number(profile.latitude),
-          Number(profile.longitude),
+          // Number(profile.latitude),          
+          // Number(profile.longitude),
+          Number(-8.830976),
+          Number(13.277594),
           Number(event.latitude),
           Number(event.longitude),
         );
@@ -161,6 +166,8 @@ export class EventsService {
       },
       include: {
         ong: true,
+        community: true,
+        user: true
       },
     });
 

@@ -54,6 +54,7 @@ export class CreateEventDto {
   @IsString({ message: 'O ID do usuário deve ser um número.' })
   userId?: string;
 
-  @IsString({ message: 'O ID da comunidade é obrigatório e deve ser um número.' })
-  communityId: string;
+  @IsOptional()
+  // @IsString({ message: 'O ID da comunidade é obrigatório e deve ser um número.' })
+  communityId?: string;
 }
