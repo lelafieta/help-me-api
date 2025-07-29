@@ -1,31 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { Prisma } from 'generated/prisma';
+import { PrismaService } from 'src/database/prisma.service';
+import { CreateFavoriteDto } from './dto/create-favorite.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class FavoritesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
-  create(createFavoriteDto: Prisma.FavoriteCreateInput) {
-    return this.prisma.favorite.create({ data: createFavoriteDto });
-  }
-
-  findAll() {
-    return this.prisma.favorite.findMany();
-  }
-
-  findOne(id: string) {
-    return this.prisma.favorite.findUnique({ where: { id } });
-  }
-
-  update(id: string, updateFavoriteDto: Prisma.FavoriteUpdateInput) {
-    return this.prisma.favorite.update({
-      where: { id },
-      data: updateFavoriteDto,
+  async favorite(createFavoriteDto: CreateFavoriteDto) {
+    
+    return this.prisma.favorite.create({
+      data: {
+        userId: createFavoriteDto.userId,
+        itemId: createFavoriteDto.itemId,
+        itemType: createFavoriteDto.itemType,
+      },
     });
   }
 
-  remove(id: string) {
-    return this.prisma.favorite.delete({ where: { id } });
+  async unfavorite(userId: string, itemId: string, itemType: string) {
+    return this.prisma.favorite.deleteMany({
+      where: { userId, itemId, itemType },
+    });
+  }
+
+  async listFavorites(userId: string, itemType?: string) {
+    return this.prisma.favorite.findMany({
+      where: {
+        userId,
+        ...(itemType ? { itemType } : {}),
+      },
+    });
+  }
+
+  async isFavorited(userId: string, itemId: string, itemType: string) {
+    const existing = await this.prisma.favorite.findFirst({
+      where: {
+        userId,
+        itemId,
+        itemType,
+      },
+    });
+
+    return { favorited: !!existing };
   }
 }
