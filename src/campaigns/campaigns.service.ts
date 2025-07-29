@@ -21,13 +21,14 @@ export class CampaignsService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      // 1️⃣ Registra documentos primeiro
+
+      
       const createdDocuments = await Promise.all(
         documents.map((doc) =>
           tx.campaignDocument.create({
             data: {
               documentPath: `/uploads/campaign_documents/${doc.filename}`,
-              userId: Number(dto.userId),
+              userId: dto.userId,
               isApproved: false,
             },
           }),
@@ -42,7 +43,7 @@ export class CampaignsService {
           return tx.campaignMidia.create({
             data: {
               midiaUrl: `/uploads/campaign_midias/${file.filename}`,
-              userId: Number(dto.userId),
+              userId: dto.userId,
               midiaType: isVideo ? 'video' : 'image',
             },
           });
@@ -57,8 +58,8 @@ export class CampaignsService {
           fundraisingGoal: Number(dto.fundraisingGoal),
           imageCoverUrl: `/uploads/campaign_midias/${cover.filename}`, // 📌 Caminho da capa
           location: dto.location,
-          categoryId: Number(dto.categoryId),
-          ongId: Number(dto.ongId),
+          categoryId: dto.categoryId,
+          ongId: dto.ongId,
           phoneNumber: dto.phoneNumber,
           beneficiaryName: dto.beneficiaryName,
           campaignType: dto.campaignType,
@@ -67,7 +68,7 @@ export class CampaignsService {
           endDate: dto.endDate ? new Date(dto.endDate) : null,
           birth: dto.birth ? new Date(dto.birth) : null,
           isActivate: Boolean(dto.isActivate),
-          userId: Number(dto.userId),
+          userId: dto.userId,
           status: dto.status !== undefined ? String(dto.status) : undefined,
           campaignDocuments: {
             connect: createdDocuments.map((doc) => ({ id: doc.id })),
@@ -78,11 +79,16 @@ export class CampaignsService {
         },
       });
 
+      
+
+      
       return campaign;
     });
   }
 
-
+  createUpdateCampaign(updateCampaignDto: UpdateCampaignDto){
+    return this.prisma.campaignUpdate.create({ data: updateCampaignDto });
+  }
 
   findAll() {
     return this.prisma.campaign.findMany({
@@ -103,7 +109,7 @@ export class CampaignsService {
     return this.prisma.campaignContributor.create({ data: createContributorDto });
   }
 
-  getAllCampaignContributor(campaignId: number) {
+  getAllCampaignContributor(campaignId: string) {
     // Não terminei de implementar
     return this.prisma.campaign.findMany({
       where: {
@@ -122,7 +128,7 @@ export class CampaignsService {
     });
   }
 
-  findCampaignsByUserId(userId: number) {
+  findCampaignsByUserId(userId: string) {
     return this.prisma.campaign.findMany({
       where: {
         userId: userId,
@@ -140,7 +146,7 @@ export class CampaignsService {
     });
   }
 
-  async findMyCampaignsByStatus(userId: number, status: string) {
+  async findMyCampaignsByStatus(userId: string, status: string) {
     return this.prisma.campaign.findMany({
       where: {
         userId: userId,
@@ -156,7 +162,7 @@ export class CampaignsService {
   }
 
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.prisma.campaign.findUnique({
       where: { id }, include: {
         category: true,
@@ -175,7 +181,7 @@ export class CampaignsService {
     });
   }
 
-  findCampaignByCategoryId(categoryId: number) {
+  findCampaignByCategoryId(categoryId: string) {
     return this.prisma.campaign.findMany({
       where: { categoryId },
       include: {
@@ -191,7 +197,7 @@ export class CampaignsService {
     });
   }
 
-  update(id: number, updateCampaignDto: UpdateCampaignDto) {
+  update(id: string, updateCampaignDto: UpdateCampaignDto) {
 
     const data: any = { ...updateCampaignDto };
 
@@ -211,11 +217,11 @@ export class CampaignsService {
     return this.prisma.campaign.update({ where: { id }, data });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prisma.campaign.delete({ where: { id } });
   }
 
-  async findUrgentCampaignsSmart(userId?: number, limit = 10) {    
+  async findUrgentCampaignsSmart(userId?: string, limit = 10) {    
     
     if (!userId) {
       console.trace('ID não fornecido a findOne');
@@ -241,7 +247,7 @@ export class CampaignsService {
         campaignUpdates: true,
         campaignContributors: {
           include: {
-            user: true
+            user: true  
           }
         },
         campaignComments: true,

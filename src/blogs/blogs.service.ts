@@ -30,8 +30,8 @@ export class BlogsService {
 
     return this.prisma.blog.create({
       data: {
-        ongId: Number(createBlogDto.ongId),
-        userId: Number(createBlogDto.userId),
+        ongId: createBlogDto.ongId,
+        userId: createBlogDto.userId,
         title: createBlogDto.title ?? '',
         description: createBlogDto.description ?? '',
         image: imageUrl ?? '',
@@ -43,7 +43,7 @@ export class BlogsService {
     return this.prisma.blog.findMany();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.prisma.blog.findUnique({ where: { id } });
   }
 
@@ -71,7 +71,7 @@ export class BlogsService {
       .slice(0, limit);
   }
 
-  async findForYouBlogs(userId: number, limit = 10) {
+  async findForYouBlogs(userId: string, limit = 10) {
     const profile = await this.prisma.profile.findUnique({
       where: { id: userId },
     });
@@ -163,17 +163,17 @@ export class BlogsService {
     return score;
   }
 
-  update(id: number, updateBlogDto: UpdateBlogDto) {
+  update(id: string, updateBlogDto: UpdateBlogDto) {
     return this.prisma.blog.update({
       where: { id },
       data: {
         ongId:
           updateBlogDto.ongId !== undefined
-            ? Number(updateBlogDto.ongId)
+            ? updateBlogDto.ongId
             : undefined,
         userId:
           updateBlogDto.userId !== undefined
-            ? Number(updateBlogDto.userId)
+            ? updateBlogDto.userId
             : undefined,
         title: updateBlogDto.title !== null ? updateBlogDto.title : '',
         description:
@@ -182,7 +182,7 @@ export class BlogsService {
     });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prisma.blog.delete({ where: { id } });
   }
 }

@@ -29,6 +29,6 @@ export class CreateCommunityDto {
   @IsUrl({}, { message: 'A URL da imagem é inválida.' })
   imageUrl?: string;
 
-  @IsInt({ message: 'O ID do proprietário deve ser um número inteiro.' })
-  ownerId: number;
+  @IsString({ message: 'O ID do proprietário deve ser um número inteiro.' })
+  ownerId: string;
 }

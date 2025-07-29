@@ -20,7 +20,7 @@ export class OngsService {
       profileImageUrl: createOngDto.profileImageUrl,
       servicesNumber: Number(0),
       supportsNumber: Number(0),
-      userId: createOngDto.userId ? Number(createOngDto.userId) : undefined,
+      userId: createOngDto.userId ? createOngDto.userId : undefined,
       vision: createOngDto.vision,
       status: createOngDto.status ?? 'pending',
       email: createOngDto.email,
@@ -93,15 +93,15 @@ export class OngsService {
     return this.prisma.ong.findMany({ include: { user: true } });
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.prisma.ong.findUnique({ where: { id } });
   }
 
-  update(id: number, updateOngDto: UpdateOngDto) {
+  update(id: string, updateOngDto: UpdateOngDto) {
     return this.prisma.ong.update({ where: { id }, data: updateOngDto });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prisma.ong.delete({ where: { id } });
   }
 }

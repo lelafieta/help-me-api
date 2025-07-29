@@ -26,7 +26,7 @@ export class CampaignContributorsController {
 
   @Get('/campaign/:campaignId')
   getContributorsByCampaign(@Param('campaignId') campaignId: string) {
-    return this.campaignContributorsService.getContributorsByCampaign(Number(campaignId));
+    return this.campaignContributorsService.getContributorsByCampaign(campaignId);
   }
 
   @Get()
@@ -37,7 +37,7 @@ export class CampaignContributorsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.campaignContributorsService.findOne(+id);
+    return this.campaignContributorsService.findOne(id);
   }
 
   @Patch(':id')
@@ -46,13 +46,13 @@ export class CampaignContributorsController {
     @Body() updateCampaignContributorDto: UpdateCampaignContributorDto,
   ) {
     return this.campaignContributorsService.update(
-      +id,
+      id,
       updateCampaignContributorDto,
     );
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.campaignContributorsService.remove(+id);
+    return this.campaignContributorsService.remove(id);
   }
 }

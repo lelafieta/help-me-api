@@ -14,18 +14,18 @@ export class FavoritesService {
     return this.prisma.favorite.findMany();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.prisma.favorite.findUnique({ where: { id } });
   }
 
-  update(id: number, updateFavoriteDto: Prisma.FavoriteUpdateInput) {
+  update(id: string, updateFavoriteDto: Prisma.FavoriteUpdateInput) {
     return this.prisma.favorite.update({
       where: { id },
       data: updateFavoriteDto,
     });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prisma.favorite.delete({ where: { id } });
   }
 }

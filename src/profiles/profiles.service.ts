@@ -20,18 +20,18 @@ export class ProfilesService {
     }));
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.prisma.profile.findUnique({ where: { id } });
   }
 
-  update(id: number, updateProfileDto: Prisma.ProfileUpdateInput) {
+  update(id: string, updateProfileDto: Prisma.ProfileUpdateInput) {
     return this.prisma.profile.update({
       where: { id },
       data: updateProfileDto,
     });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prisma.profile.delete({ where: { id } });
   }
 }

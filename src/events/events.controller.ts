@@ -29,7 +29,7 @@ export class EventsController {
   create(
     @Body() createEventDto: CreateEventDto,
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: { user: { id: number } },
+    @Req() req: { user: { id: string } },
   ) {
     return this.eventsService.create(createEventDto, file, req.user.id);
   }
@@ -41,26 +41,26 @@ export class EventsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.eventsService.findOne(Number(id));
+    return this.eventsService.findOne(id);
   }
 
   @Get('/nearby')
-  getNearbyEvents(@Req() req: { user: { id: number } }) {
+  getNearbyEvents(@Req() req: { user: { id: string } }) {
     return this.eventsService.findNearbyEventsSmart(req.user.id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(Number(id), updateEventDto);
+    return this.eventsService.update(id, updateEventDto);
   }
 
   @Get('for-you')
-  getEventsForYou(@Req() req: { user: { id: number } }) {
+  getEventsForYou(@Req() req: { user: { id: string } }) {
     return this.eventsService.findForYouEvents(req.user.id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.eventsService.remove(Number(id));
+    return this.eventsService.remove(id);
   }
 }

@@ -47,13 +47,13 @@ export class CreateEventDto {
   endDate?: string;
 
   @IsOptional()
-  @IsInt({ message: 'O ID da ONG deve ser um número.' })
-  ongId?: number;
+  @IsString({ message: 'O ID da ONG deve ser um número.' })
+  ongId?: string;
 
   @IsOptional()
-  @IsInt({ message: 'O ID do usuário deve ser um número.' })
-  userId?: number;
+  @IsString({ message: 'O ID do usuário deve ser um número.' })
+  userId?: string;
 
-  @IsInt({ message: 'O ID da comunidade é obrigatório e deve ser um número.' })
-  communityId: number;
+  @IsString({ message: 'O ID da comunidade é obrigatório e deve ser um número.' })
+  communityId: string;
 }

@@ -41,8 +41,8 @@ export class CreateOngDto {
   profileImageUrl?: string;
 
   @IsOptional()
-  @IsInt({ message: 'O campo "userId" deve ser um número inteiro.' })
-  userId?: number;
+  @IsString({ message: 'O campo "userId" deve ser um número inteiro.' })
+  userId?: string;
 
   @IsOptional()
   @IsString({ message: 'O campo "vision" deve ser um texto.' })

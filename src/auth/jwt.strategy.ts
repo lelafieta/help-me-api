@@ -4,7 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from 'src/database/prisma.service';
 
 interface JwtPayload {
-  sub: number;
+  sub: string;
   email: string;
 }
 
@@ -20,14 +20,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: JwtPayload) {
     const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
+      where: { email: payload.email },
     });
 
     if (!user) {
       throw new UnauthorizedException('Usuário não encontrado');
-    }
-
-    // Isso será colocado no req.user
+    }    
     return user;
   }
 }

@@ -24,18 +24,18 @@ export class CampaignContributorsService {
     });
   }
 
-  async getContributorsByCampaign(camapaignId: number){
+  async getContributorsByCampaign(camapaignId: string){
     return await this.prisma.campaignContributor.findMany({ where: { campaignId: camapaignId } });
   }
 
-  async findOne(id: number): Promise<CampaignContributor | null> {
+  async findOne(id: string): Promise<CampaignContributor | null> {
     return await this.prisma.campaignContributor.findUnique({
       where: { id },
     });
   }
 
   async update(
-    id: number,
+    id: string,
     updateCampaignContributorDto: UpdateCampaignContributorDto,
   ): Promise<CampaignContributor> {
     return await this.prisma.campaignContributor.update({
@@ -44,7 +44,7 @@ export class CampaignContributorsService {
     });
   }
 
-  async remove(id: number): Promise<CampaignContributor> {
+  async remove(id: string): Promise<CampaignContributor> {
     return await this.prisma.campaignContributor.delete({
       where: { id },
     });

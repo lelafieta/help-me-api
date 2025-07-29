@@ -30,7 +30,7 @@ export class CommunitiesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.communitiesService.findOne(Number(id));
+    return this.communitiesService.findOne(id);
   }
 
   @Patch(':id')
@@ -38,11 +38,11 @@ export class CommunitiesController {
     @Param('id') id: string,
     @Body() updateCommunityDto: UpdateCommunityDto,
   ) {
-    return this.communitiesService.update(Number(id), updateCommunityDto);
+    return this.communitiesService.update(id, updateCommunityDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.communitiesService.remove(Number(id));
+    return this.communitiesService.remove(id);
   }
 }

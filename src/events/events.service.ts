@@ -14,7 +14,7 @@ export class EventsService {
   async create(
     createEventDto: CreateEventDto,
     file: Express.Multer.File,
-    userId: number,
+    userId: string,
   ) {
     let backgroundImageUrl: string | undefined;
 
@@ -31,12 +31,12 @@ export class EventsService {
 
     return this.prisma.event.create({
       data: {
-        ongId: Number(createEventDto.ongId),
-        userId: Number(userId),
+        ongId: createEventDto.ongId,
+        userId: userId,
         title: createEventDto.title,
         location: createEventDto.location,
         description: createEventDto.description,
-        communityId: Number(createEventDto.communityId),
+        communityId: createEventDto.communityId,
 
         startDate: createEventDto.startDate
           ? new Date(createEventDto.startDate)
@@ -72,7 +72,7 @@ export class EventsService {
     return R * c;
   }
 
-  async findNearbyEventsSmart(userId: number, radiusKm = 20) {
+  async findNearbyEventsSmart(userId: string, radiusKm = 20) {
     const profile = await this.prisma.profile.findUnique({
       where: { id: userId },
       select: { latitude: true, longitude: true },
@@ -146,7 +146,7 @@ export class EventsService {
     return score;
   }
 
-  async findForYouEvents(userId: number, limit = 10) {
+  async findForYouEvents(userId: string, limit = 10) {
     const profile = await this.prisma.profile.findUnique({
       where: { id: userId },
     });
@@ -175,15 +175,15 @@ export class EventsService {
       .slice(0, limit);
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.prisma.event.findUnique({ where: { id } });
   }
 
-  update(id: number, updateEventDto: UpdateEventDto) {
+  update(id: string, updateEventDto: UpdateEventDto) {
     return this.prisma.event.update({ where: { id }, data: updateEventDto });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prisma.event.delete({ where: { id } });
   }
 }

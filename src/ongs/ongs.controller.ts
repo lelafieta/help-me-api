@@ -30,7 +30,7 @@ export class OngsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.ongsService.findOne(Number(id));
+    return this.ongsService.findOne(id);
   }
 
   @Get('popular')
@@ -40,11 +40,11 @@ export class OngsController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOngDto: UpdateOngDto) {
-    return this.ongsService.update(Number(id), updateOngDto);
+    return this.ongsService.update(id, updateOngDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.ongsService.remove(Number(id));
+    return this.ongsService.remove(id);
   }
 }

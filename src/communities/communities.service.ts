@@ -15,18 +15,18 @@ export class CommunitiesService {
     return this.prisma.community.findMany();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.prisma.community.findUnique({ where: { id } });
   }
 
-  update(id: number, updateCommunityDto: UpdateCommunityDto) {
+  update(id: string, updateCommunityDto: UpdateCommunityDto) {
     return this.prisma.community.update({
       where: { id },
       data: updateCommunityDto,
     });
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.prisma.community.delete({ where: { id } });
   }
 }

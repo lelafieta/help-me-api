@@ -19,8 +19,8 @@ export class FeedsService {
         title: createFeedDto.title,
         description: createFeedDto.description,
         image: imagePath,
-        userId: Number(createFeedDto.userId), // 👈 conversão para número
-        ongId: Number(createFeedDto.ongId), // 👈 conversão para número
+        userId: createFeedDto.userId,
+        ongId: createFeedDto.ongId
       },
     });
   }
@@ -38,7 +38,7 @@ export class FeedsService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const feed = await this.prisma.feed.findUnique({
       where: { id },
       include: {
@@ -57,7 +57,7 @@ export class FeedsService {
     return feed;
   }
 
-  async update(id: number, updateFeedDto: UpdateFeedDto) {
+  async update(id: string, updateFeedDto: UpdateFeedDto) {
     // Verifica se o feed existe
     await this.findOne(id);
 
@@ -71,7 +71,7 @@ export class FeedsService {
     });
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     // Verifica se o feed existe
     await this.findOne(id);
 

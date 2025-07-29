@@ -22,6 +22,7 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import { diskStorage } from 'multer';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
+import { CreateUpdateCampaignDto } from './dto/create-update-campaign.dto';
 
 @Controller('campaigns')
 @UseGuards(AuthGuard('jwt'))
@@ -84,27 +85,32 @@ export class CampaignsController {
   @HttpCode(200)
   @Get('user/:userId')
   findCampaignsByUserId(@Param('userId') userId: string) {
-    return this.campaignsService.findCampaignsByUserId(Number(userId));
+    return this.campaignsService.findCampaignsByUserId(userId);
   }
 
   @Get('/smart-urgent')
-  getSmartUrgent(@Request() req: { user: { id: number } }) {
+  getSmartUrgent(@Request() req: { user: { id: string } }) {
     return this.campaignsService.findUrgentCampaignsSmart(req.user.id);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.campaignsService.findOne(Number(id));
+    return this.campaignsService.findOne(id);
   }
 
   @Get('/category/:id')
   findCampaignByCategoryId(@Param('id') id: string) {
-    return this.campaignsService.findCampaignByCategoryId(Number(id));
+    return this.campaignsService.findCampaignByCategoryId(id);
+  }
+
+  @Post('/updates')
+  createUpdateCampaign(@Body() createUpdateCampaignDto: CreateUpdateCampaignDto)  {
+    return this.campaignsService.createUpdateCampaign(createUpdateCampaignDto);
   }
 
   @Get('my-campaigns/:status')
   getMyCampaignsByStatus(
-    @Req() req: { user: { id: number } },
+    @Req() req: { user: { id: string } },
     @Param('status') status: string,
   ) {
     return this.campaignsService.findMyCampaignsByStatus(req.user.id, status);
@@ -115,11 +121,11 @@ export class CampaignsController {
     @Param('id') id: string,
     @Body() updateCampaignDto: UpdateCampaignDto,
   ) {
-    return this.campaignsService.update(Number(id), updateCampaignDto);
+    return this.campaignsService.update(id, updateCampaignDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.campaignsService.remove(Number(id));
+    return this.campaignsService.remove(id);
   }
 }

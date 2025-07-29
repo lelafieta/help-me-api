@@ -59,7 +59,7 @@ export class AuthService {
     });
 
     // JWT
-    const payload = { sub: user.id, email: user.email };
+    const payload = { email: user.email };
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -95,7 +95,7 @@ export class AuthService {
     };
   }
 
-  async getProfile(userId: number) {
+  async getProfile(userId: string) {
     return this.prisma.profile.findUnique({
       where: { id: userId },
       include: { user: true },

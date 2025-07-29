@@ -1,11 +1,11 @@
-import { IsInt, IsBoolean, IsOptional, IsDecimal } from 'class-validator';
+import { IsInt, IsBoolean, IsOptional, IsDecimal, IsString } from 'class-validator';
 
 export class CreateCampaignContributorDto {
-  @IsInt()
-  campaignId: number;
+  @IsString()
+  campaignId: string;
 
-  @IsInt()
-  userId: number;
+  @IsString()
+  userId: string;
 
   @IsDecimal()
   @IsOptional()

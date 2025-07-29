@@ -41,7 +41,7 @@ export class BlogsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.blogsService.findOne(Number(id));
+    return this.blogsService.findOne(id);
   }
 
   @Get('featured')
@@ -50,17 +50,17 @@ export class BlogsController {
   }
 
   @Get('for-you')
-  getForYouBlogs(@Req() req: { user: { id: number } }) {
+  getForYouBlogs(@Req() req: { user: { id: string } }) {
     return this.blogsService.findForYouBlogs(req.user.id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
-    return this.blogsService.update(Number(id), updateBlogDto);
+    return this.blogsService.update(id, updateBlogDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.blogsService.remove(+id);
+    return this.blogsService.remove(id);
   }
 }
