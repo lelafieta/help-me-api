@@ -7,20 +7,21 @@ import { Prisma } from '@prisma/client';
 export class FavoritesService {
   constructor(private readonly prisma: PrismaService) { }
 
-  async favorite(createFavoriteDto: CreateFavoriteDto) {
-    
+  async favorite(userId: string, createFavoriteDto: CreateFavoriteDto) {
+
+
     return this.prisma.favorite.create({
-      data: {
-        userId: createFavoriteDto.userId,
+      data: {        
+        userId: userId,
         itemId: createFavoriteDto.itemId,
         itemType: createFavoriteDto.itemType,
       },
     });
   }
 
-  async unfavorite(userId: string, itemId: string, itemType: string) {
+  async unfavorite(userId: string, createFavoriteDto: CreateFavoriteDto) {
     return this.prisma.favorite.deleteMany({
-      where: { userId, itemId, itemType },
+      where: { userId: userId, itemId: createFavoriteDto.itemId, itemType: createFavoriteDto.itemType },
     });
   }
 

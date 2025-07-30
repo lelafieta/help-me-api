@@ -1,9 +1,6 @@
 import { IsString, IsOptional, IsUUID } from 'class-validator';
 
-export class CreateFavoriteDto {  
-  @IsUUID()
-  userId: string;
-
+export class CreateFavoriteDto {    
   @IsUUID()
   itemId: string;
   

@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Get, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Delete, Get, Body, Param, Query, UseGuards,   Request, } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { FavoritesService } from './favorites.service';
@@ -12,25 +12,28 @@ export class FavoritesController {
 
   @Post()
   async addFavorite(    
+    @Request() req: { user: { id: string } },
     @Body() createFavoriteDto: CreateFavoriteDto,
   ) {
-    return this.favoriteService.favorite(createFavoriteDto);
+    return this.favoriteService.favorite(req.user.id,createFavoriteDto);
   }
 
   @Delete()
   async removeFavorite(
-    @GetUser('id') userId: string,
-    @Body() body: { itemId: string; itemType: string },
+    @Request() req: { user: { id: string } },
+    @Body() createFavoriteDto: CreateFavoriteDto,
   ) {
-    return this.favoriteService.unfavorite(userId, body.itemId, body.itemType);
+    console.log('userId:', req.user.id);
+
+    return this.favoriteService.unfavorite(req.user.id, createFavoriteDto);
   }
 
   @Get()
   async getFavorites(
-    @GetUser('id') userId: string,
+    @Request() req: { user: { id: string } },
     @Query('itemType') itemType?: string,
   ) {
-    return this.favoriteService.listFavorites(userId, itemType);
+    return this.favoriteService.listFavorites(req.user.id, itemType);
   }
 
   @Get(':itemId')

@@ -383,7 +383,7 @@ model Message {
 
 model Favorite {
   id        String   @id @default(uuid())
-  userId    String
+  userId    String?
   itemId    String
   itemType  String
   createdAt DateTime @default(now())
