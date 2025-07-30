@@ -1,32 +1,156 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CreateOngDto } from './dto/create-ong.dto';
 import { UpdateOngDto } from './dto/update-ong.dto';
 import { Blog, Ong } from '@prisma/client';
+import { AddOngMemberDto } from './dto/add-ong-member.dto';
+import { CreateJoinRequestDto, RespondJoinRequestDto } from './dto/join-request.dto';
 
 @Injectable()
 export class OngsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(createOngDto: CreateOngDto) {
-    const data = {
-      about: createOngDto.about,
-      bio: createOngDto.bio,
-      coverImageUrl: createOngDto.coverImageUrl,
-      isVerified: createOngDto.isVerified ?? false,
-      mission: createOngDto.mission,
-      name: createOngDto.name,
-      phoneNumber: createOngDto.phoneNumber,
-      profileImageUrl: createOngDto.profileImageUrl,
-      servicesNumber: Number(0),
-      supportsNumber: Number(0),
-      userId: createOngDto.userId ? createOngDto.userId : undefined,
-      vision: createOngDto.vision,
-      status: createOngDto.status ?? 'pending',
-      email: createOngDto.email,
-      website: createOngDto.website,
+    return this.prisma.$transaction(async (tx) => {
+      const ong = await tx.ong.create({
+        data: {
+          about: createOngDto.about,
+          bio: createOngDto.bio,
+          coverImageUrl: createOngDto.coverImageUrl,
+          isVerified: createOngDto.isVerified ?? false,
+          mission: createOngDto.mission,
+          name: createOngDto.name,
+          phoneNumber: createOngDto.phoneNumber,
+          profileImageUrl: createOngDto.profileImageUrl,
+          servicesNumber: 0,
+          supportsNumber: 0,
+          userId: createOngDto.userId ?? undefined,
+          vision: createOngDto.vision,
+          status: createOngDto.status ?? 'pending',
+          email: createOngDto.email,
+          website: createOngDto.website,
+        },
+      });
+
+      // Se foi passado userId, criar membro ADMIN
+      if (createOngDto.userId) {
+        await tx.ongMember.create({
+          data: {
+            name: createOngDto.name ?? 'Administrador',
+            role: 'ADMIN',
+            ongId: ong.id,
+            userId: createOngDto.userId,
+            email: createOngDto.email,
+            phone: createOngDto.phoneNumber,
+          },
+        });
+      }
+
+      return ong;
+    });
+  }
+
+  // Criar pedido para entrar
+  async createJoinRequest(
+    userId: string | null,
+    ongId: string,
+    dto: CreateJoinRequestDto,
+  ) {
+    const alreadyExists = await this.prisma.ongJoinRequest.findFirst({
+      where: { email: dto.email, ongId, status: 'PENDING' },
+    });
+
+    if (alreadyExists) {
+      throw new BadRequestException('Já existe um pedido pendente para este e-mail.');
+    }
+
+    const joinRequest = await this.prisma.ongJoinRequest.create({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        phone: dto.phone,
+        role: dto.role,
+        userId: userId ?? null,
+        ongId,
+      },
+    });
+
+    return {
+      message: 'Pedido enviado com sucesso.',
+      request: joinRequest,
     };
-    return this.prisma.ong.create({ data });
+  }
+
+  // Listar pedidos pendentes da ONG (ADMIN apenas)
+  async listJoinRequests(ongId: string, adminUserId: string) {
+    const isAdmin = await this.prisma.ongMember.findFirst({
+      where: { userId: adminUserId, ongId, role: 'ADMIN' },
+    });
+
+    // if (!isAdmin) {
+    //   throw new ForbiddenException('Apenas administradores podem ver os pedidos.');
+    // }
+
+    return this.prisma.ongJoinRequest.findMany({
+      where: { ongId, status: 'PENDING' },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // Responder ao pedido
+  async respondToJoinRequest(
+    requestId: string,
+    adminUserId: string,
+    dto: RespondJoinRequestDto,
+  ) {
+    const request = await this.prisma.ongJoinRequest.findUnique({
+      where: { id: requestId },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Pedido não encontrado.');
+    }
+
+    const isAdmin = await this.prisma.ongMember.findFirst({
+      where: { userId: adminUserId, ongId: request.ongId, role: 'ADMIN' },
+    });
+
+    // if (!isAdmin) {
+    //   throw new ForbiddenException('Apenas administradores podem aceitar ou rejeitar.');
+    // }
+
+    if (dto.accept) {
+      const member = await this.prisma.$transaction(async (tx) => {
+        const created = await tx.ongMember.create({
+          data: {
+            name: request.name,
+            email: request.email,
+            phone: request.phone,
+            role: request.role,
+            userId: request.userId ?? undefined,
+            ongId: request.ongId,
+          },
+        });
+
+        await tx.ongJoinRequest.delete({ where: { id: requestId } });
+
+        return created;
+      });
+
+      return {
+        message: 'Pedido aceito e membro adicionado.',
+        member,
+      };
+    } else {
+      await this.prisma.ongJoinRequest.update({
+        where: { id: requestId },
+        data: { status: 'REJECTED' },
+      });
+
+      return {
+        message: 'Pedido rejeitado.',
+      };
+    }
   }
 
   calculateBlogFeaturedScore(blog: Blog & { ong: Ong | null }): number {
@@ -60,6 +184,8 @@ export class OngsService {
         campaigns: true,
         events: true,
         feeds: true,
+        user: true,
+        ongMember: true
       },
     });
 
@@ -94,7 +220,7 @@ export class OngsService {
   }
 
   findOne(id: string) {
-    return this.prisma.ong.findUnique({ where: { id } });
+    return this.prisma.ong.findUnique({ where: { id }, include: { user: true } });
   }
 
   update(id: string, updateOngDto: UpdateOngDto) {

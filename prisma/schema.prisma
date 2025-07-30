@@ -51,6 +51,9 @@ model User {
   Favorite Favorite[]
   @@map("users")  
   
+  OngMember OngMember[]
+  OngJoinRequest OngJoinRequest[]
+  MemberOng MemberOng[]
 }
 
 model Blog {
@@ -452,10 +455,47 @@ model Ong {
   feeds           Feed[]
   user         User?       @relation(fields: [userId], references: [id])
   ongsDocuments   OngsDocument[]
+  Post Post[]
+  ongMember OngMember[]
 
   @@map("ongs")
-  Post Post[]
+  
+  
+  MemberOng MemberOng[]
+  OngJoinRequest OngJoinRequest[]
 }
+
+model MemberOng {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      String
+  userId    String
+  ongId     String
+
+  user      User     @relation(fields: [userId], references: [id])
+  ong       Ong      @relation(fields: [ongId], references: [id])
+
+  @@unique([userId, ongId])
+}
+
+model OngJoinRequest {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  status     String @default("PENDING")
+  role       String 
+  name       String
+  email      String
+  phone      String?
+  userId     String?
+  ongId      String
+
+  user       User?    @relation(fields: [userId], references: [id])
+  ong        Ong      @relation(fields: [ongId], references: [id])
+}
+
+
 
 model OngsDocument {
   id                            String    @id @default(uuid())
@@ -476,6 +516,27 @@ model OngsDocument {
 
   @@map("ongs_documents")
 }
+
+
+model OngMember {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String
+  role      String // exemplo: "AMIN", "PRESIDENT", "MANAGER", "MEMBER", "VOLUNTEER", "COORDINATOR", "TREASURER", "SECRETARY", "PROJECT_LEADER", "FIELD_AGENT".
+  email     String?
+  phone     String?
+
+  ongId     String
+  userId    String? // caso o membro também seja um usuário da plataforma
+
+  ong       Ong     @relation(fields: [ongId], references: [id])
+  user      User?   @relation(fields: [userId], references: [id])
+
+  @@map("ong_members")
+}
+
 
 model Payment {
   id          String   @id @default(uuid())
