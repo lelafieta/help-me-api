@@ -5,6 +5,7 @@ import { UpdateBlogDto } from './dto/update-blog.dto';
 import { join } from 'path';
 import * as fs from 'fs';
 import { Blog, Ong, Profile } from '@prisma/client';
+import { Comment } from '../../generated/prisma/index';
 
 @Injectable()
 export class BlogsService {
@@ -54,6 +55,10 @@ export class BlogsService {
       },
       include: {
         ong: true,
+        blogComments: true,
+        blogLikes: true,
+        blogShares: true,
+        user: true
       },
       orderBy: {
         createdAt: 'desc',
@@ -83,7 +88,18 @@ export class BlogsService {
         },
       },
       include: {
-        ong: true,
+        ong: {
+          include: {
+            user: true
+          }
+        },
+        user: true,
+        blogComments: true,
+        blogLikes: true,
+        blogShares: true,        
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
 
@@ -155,11 +171,13 @@ export class BlogsService {
       'comunidade',
       'solidariedade',
       'saúde',
+      'importante'
     ];
     const content =
       `${blog.title ?? ''} ${blog.description ?? ''}`.toLowerCase();
     if (keywords.some((k) => content.includes(k))) score += 2;
-
+    
+    
     return score;
   }
 

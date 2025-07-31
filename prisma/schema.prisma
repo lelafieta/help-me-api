@@ -56,6 +56,9 @@ model User {
   MemberOng MemberOng[]
   Impact Impact[]
   EventParticipant EventParticipant[]
+  BlogComment BlogComment[]
+  BlogLike BlogLike[]
+  BlogShare BlogShare[]
 }
 
 model Blog {
@@ -65,13 +68,63 @@ model Blog {
   description String?
   userId      String?
   ongId       String?
+  read        Int      @default(0)
   title       String?
   image       String?
   user     User?  @relation(fields: [userId], references: [id])
   ong         Ong?      @relation(fields: [ongId], references: [id])
 
+  blogComments BlogComment[]
+  blogLikes BlogLike[]
+  blogShares BlogShare[]
+
   @@map("blogs")  
+  
 }
+
+model BlogComment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+
+  blogId String
+  userId String
+
+  blog   Blog @relation(fields: [blogId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("blog_comments")
+}
+
+model BlogLike {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  blogId String
+  userId String
+
+  blog Blog @relation(fields: [blogId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([blogId, userId]) // evita likes duplicados
+  @@map("blog_likes")
+}
+
+model BlogShare {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  blogId String
+  userId String
+
+  blog Blog @relation(fields: [blogId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("blog_shares")
+}
+
+
 
 model FeedComment {
   id          String   @id @default(uuid())
@@ -101,15 +154,19 @@ model FeedLike {
 }
 
 model FeedView {
-  id          String   @id @default(uuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-  userId      String?
-  feedId  String?
-  description String?
-  user    User?  @relation(fields: [userId], references: [id])
-  feed    Feed? @relation(fields: [feedId], references: [id])
+  id              String   @id @default(uuid())
+  feed      Feed     @relation(fields: [feedId], references: [id])
+  feedId    String
 
+  user      User?    @relation(fields: [userId], references: [id])
+  userId   String?
+
+  ip        String?  // útil para identificar anônimos (cuidado com privacidade)
+  userAgent String?  // opcional para analytics
+  viewedAt  DateTime @default(now())
+
+  @@index([feedId])
+  @@unique([feedId, userId]) 
   @@map("feed_views")
 }
 
@@ -123,8 +180,7 @@ model CampaignComment {
   user     User?  @relation(fields: [userId], references: [id])
   campaign    Campaign? @relation(fields: [campaignId], references: [id])
 
-  @@map("campaign_comments")
-  Profile Profile[]
+  @@map("campaign_comments")  
 }
 
 model CampaignContributor {
@@ -136,8 +192,7 @@ model CampaignContributor {
   money       Decimal?  @default(0)
   isAnonymous Boolean?  @default(false)
   user     User?  @relation(fields: [userId], references: [id])
-  campaign    Campaign? @relation(fields: [campaignId], references: [id])
-  Profile Profile[]
+  campaign    Campaign? @relation(fields: [campaignId], references: [id])  
   @@map("campaign_contributors")
   
 }
@@ -153,8 +208,7 @@ model CampaignDocument {
   user         User?  @relation(fields: [userId], references: [id])
   campaign     Campaign? @relation(fields: [campaignId], references: [id])
 
-  @@map("campaign_documents")
-  Profile Profile[]
+  @@map("campaign_documents")  
 }
 
 model CampaignMidia {
@@ -168,8 +222,7 @@ model CampaignMidia {
   user    User?  @relation(fields: [userId], references: [id])
   campaign   Campaign? @relation(fields: [campaignId], references: [id])
 
-  @@map("campaign_midias")
-  Profile Profile[]
+  @@map("campaign_midias")  
 }
 
 model CampaignUpdate {
@@ -183,8 +236,7 @@ model CampaignUpdate {
   user     User?  @relation(fields: [userId], references: [id])
   campaign    Campaign? @relation(fields: [campaignId], references: [id])
 
-  @@map("campaign_updates")
-  Profile Profile[]
+  @@map("campaign_updates")  
 }
 
 model Campaign {
@@ -231,7 +283,7 @@ model Category {
   campaigns   Campaign[]
 
   
-  Community Community[]
+  community Community[]
   @@map("categories")
 }
 
@@ -251,8 +303,7 @@ model Community {
   posts       Post[]
   events      Event[]
   resources   Resource[]
-  categories  Category[]
-  Profile Profile[]
+  categories  Category[]  
 
   @@map("communities")  
 }
@@ -287,8 +338,6 @@ model Resource {
   @@map("resources")
 }
 
-
-
 model Post {
   id          String   @id @default(uuid())
   title        String
@@ -307,7 +356,6 @@ model Post {
   comments     Comment[]
   @@map("posts")
 }
-
 model Comment {
   id          String   @id @default(uuid())
   content   String
@@ -320,7 +368,6 @@ model Comment {
   user      User     @relation(fields: [userId], references: [id])
   @@map("comments")
 }
-
 
 model Event {
   id                String   @id @default(uuid())
@@ -338,7 +385,7 @@ model Event {
   updatedAt          DateTime? @updatedAt
   user            User?  @relation(fields: [userId], references: [id])
   ong                Ong?      @relation(fields: [ongId], references: [id])  
-  Profile Profile[]  
+
   communityId  String?
   community    Community? @relation(fields: [communityId], references: [id])
   eventParticipants EventParticipant[]
@@ -421,15 +468,18 @@ model Feed {
   ongId       String?
   title       String?
   image       String?
-  user     User?  @relation(fields: [userId], references: [id])
+  views       Int?      @default(0)
+  likes       Int?      @default(0)
+  comments    Int?      @default(0)  
+  user        User?  @relation(fields: [userId], references: [id])
   ong         Ong?      @relation(fields: [ongId], references: [id])
 
   
-  FeedComment FeedComment[]
-  Profile Profile[]
-  FeedLike FeedLike[]
-  FeedView FeedView[]
+  feedComment FeedComment[]
+  feedLike FeedLike[]  
+  feedView FeedView[]
   @@map("feeds")  
+  
 }
 
 model Notification {
@@ -609,15 +659,7 @@ model Profile {
   campaignQtd          Int?               @default(0)
   lastName             String?
   fullName             String?
-  phoneNumber          String?  
-  campaignComments     CampaignComment[]
-  campaignContributors CampaignContributor[]
-  campaignDocuments    CampaignDocument[]
-  campaignMidias       CampaignMidia[]
-  campaignUpdates      CampaignUpdate[]
-  communities          Community[]
-  events               Event[]  
-  feeds                Feed[]  
+  phoneNumber          String?    
   user                 User                  @relation(fields: [id], references: [id])
 
   @@map("profiles")

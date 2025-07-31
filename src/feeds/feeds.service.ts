@@ -1,82 +1,165 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFeedDto } from './dto/create-feed.dto';
 import { UpdateFeedDto } from './dto/update-feed.dto';
 import { PrismaService } from 'src/database/prisma.service';
+import { CreateViewDto } from './dto/create-view.dto';
+import { CreateLikeDto } from './dto/create-like.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class FeedsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
-  async create(createFeedDto: CreateFeedDto, file?: Express.Multer.File) {
-    let imagePath: string | null = null;
 
-    if (file) {
-      imagePath = `/uploads/feeds/${file.filename}`;
-    }
+  async createFeed(dto: CreateFeedDto, imageUrl: string | null, userId?: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const newFeed = await tx.feed.create({
+        data: {
+          title: dto.title,
+          description: dto.description,
+          userId: userId || dto.userId,
+          ongId: dto.ongId,
+          image: imageUrl,
+          views: 0,
+          likes: 0,
+          comments: 0,
+        },
+      });
 
-    return this.prisma.feed.create({
-      data: {
-        title: createFeedDto.title,
-        description: createFeedDto.description,
-        image: imagePath,
-        userId: createFeedDto.userId,
-        ongId: createFeedDto.ongId
-      },
+      // Aqui você pode criar notificações, logs, etc. dentro da transação
+      return newFeed;
     });
   }
 
-  async findAll() {
+
+  async getAllFeeds() {
     return this.prisma.feed.findMany({
-      orderBy: { createdAt: 'desc' },
       include: {
+        feedComment: true,
+        feedLike: true,
+        feedView: true,
         user: true,
         ong: true,
-        FeedComment: true,
-        FeedLike: true,
-        FeedView: true,
       },
     });
   }
 
-  async findOne(id: string) {
-    const feed = await this.prisma.feed.findUnique({
-      where: { id },
-      include: {
-        user: true,
-        ong: true,
-        FeedComment: true,
-        FeedLike: true,
-        FeedView: true,
+  async commentFeed(dto: CreateCommentDto) {
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Cria o comentário
+      const comment = await tx.feedComment.create({ data: dto });
+
+      // 2. Incrementa o contador de comentários no feed
+      await tx.feed.update({
+        where: { id: dto.feedId },
+        data: { comments: { increment: 1 } },
+      });
+
+      
+
+      return comment;
+    });
+  }
+
+  async toggleLikeFeed(feedId: string, userId: string) {
+  return this.prisma.$transaction(async (tx) => {
+    const existingLike = await tx.feedLike.findFirst({
+      where: {
+        feedId,
+        userId,
       },
     });
+
+    if (existingLike) {
+      // Remover like
+      await tx.feedLike.delete({
+        where: { id: existingLike.id },
+      });
+
+      await tx.feed.update({
+        where: { id: feedId },
+        data: { likes: { decrement: 1 } },
+      });
+
+      return { liked: false, message: 'Like removido com sucesso' };
+    } else {
+      // Criar like
+      await tx.feedLike.create({
+        data: { feedId, userId },
+      });
+
+      await tx.feed.update({
+        where: { id: feedId },
+        data: { likes: { increment: 1 } },
+      });
+
+      return { liked: true, message: 'Feed curtido com sucesso' };
+    }
+  });
+}
+
+
+  async getFeedById(feedId: string, userId?: string, ip?: string, userAgent?: string) {
+    return this.prisma.$transaction(async (tx) => {
+      // Verifica se já visualizou (com base em userId ou ip)
+      const alreadyViewed = await tx.feedView.findFirst({
+        where: {
+          feedId,
+          OR: [
+            { userId: userId ?? undefined },
+            { ip: userId ? undefined : ip }, // só usa IP se não tiver userId
+          ],
+        },
+      });
+
+      if (!alreadyViewed) {
+        // Cria o registro da view
+        await tx.feedView.create({
+          data: { feedId, userId, ip, userAgent },
+        });
+
+        // Incrementa o contador de views
+        await tx.feed.update({
+          where: { id: feedId },
+          data: { views: { increment: 1 } },
+        });
+      }
+
+      // Retorna os detalhes do feed
+      return tx.feed.findUnique({
+        where: { id: feedId },
+        include: {
+          feedComment: true,
+          feedLike: true,
+          feedView: true,
+        },
+      });
+    });
+  }
+
+
+  async deleteFeed(feedId: string, userId: string) {
+    // Verifica se o feed existe e pertence ao usuário
+    const feed = await this.prisma.feed.findUnique({ where: { id: feedId } });
 
     if (!feed) {
-      throw new NotFoundException(`Feed com ID ${id} não encontrado.`);
+      throw new NotFoundException('Feed not found');
     }
 
-    return feed;
-  }
+    if (feed.userId !== userId) {
+      throw new ForbiddenException('You are not allowed to delete this feed');
+    }
 
-  async update(id: string, updateFeedDto: UpdateFeedDto) {
-    // Verifica se o feed existe
-    await this.findOne(id);
+    // Deleta tudo em transação
+    return this.prisma.$transaction(async (tx) => {
+      await tx.feedComment.deleteMany({ where: { feedId } });
+      await tx.feedLike.deleteMany({ where: { feedId } });
+      await tx.feedView.deleteMany({ where: { feedId } });
+      await tx.feed.delete({ where: { id: feedId } });
 
-    return this.prisma.feed.update({
-      where: { id },
-      data: {
-        title: updateFeedDto.title,
-        description: updateFeedDto.description,
-        image: updateFeedDto.image,
-      },
+      return { message: 'Feed deleted successfully' };
     });
   }
 
-  async remove(id: string) {
-    // Verifica se o feed existe
-    await this.findOne(id);
 
-    return this.prisma.feed.delete({
-      where: { id },
-    });
-  }
 }

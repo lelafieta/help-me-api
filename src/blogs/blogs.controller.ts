@@ -39,20 +39,23 @@ export class BlogsController {
     return this.blogsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.blogsService.findOne(id);
-  }
-
   @Get('featured')
   getFeaturedBlogs() {
     return this.blogsService.findFeaturedBlogs();
   }
 
+  
   @Get('for-you')
   getForYouBlogs(@Req() req: { user: { id: string } }) {
     return this.blogsService.findForYouBlogs(req.user.id);
   }
+
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.blogsService.findOne(id);
+  }
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
