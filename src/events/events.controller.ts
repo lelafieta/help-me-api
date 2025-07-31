@@ -17,6 +17,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateEventParticipantDto } from './dto/create-event-participant.dto';
 
 @Controller('events')
 @UseGuards(AuthGuard('jwt'))
@@ -42,6 +43,21 @@ export class EventsController {
   @Get('/nearby')
   getNearbyEvents(@Req() req: { user: { id: string } }) {
     return this.eventsService.findNearbyEventsSmart(req.user.id);
+  }
+
+  @Post('/participants')
+  createEventParticipant(@Body() dto: CreateEventParticipantDto) {
+    return this.eventsService.createEventParticipant(dto);
+  }
+
+  @Get('/participants/:eventId')
+  findByEvent(@Param('eventId') eventId: string) {
+    return this.eventsService.findParticipantsByEvent(eventId);
+  }
+
+  @Delete('/participants/:eventId/:userId')
+  removeEventParticipant(@Param('eventId') eventId: string, @Param('userId') userId: string) {
+    return this.eventsService.removeEventParticipant(eventId, userId);
   }
 
   @Get(':id')

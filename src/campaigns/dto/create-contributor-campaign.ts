@@ -6,4 +6,5 @@ export class CampaignContributorResponseDto {
   updatedAt: Date;
   money: number;
   isAnonymous: boolean;
+  campaignId: string
 }

@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { join } from 'path';
 import * as fs from 'fs';
 import { Event, Profile } from '@prisma/client';
+import { CreateEventParticipantDto } from './dto/create-event-participant.dto';
 // import { Multer } from 'multer';
 
 @Injectable()
@@ -98,7 +99,12 @@ export class EventsService {
       include: {
         ong: true,
         community: true,
-        user: true
+        user: true,
+        eventParticipants: {
+        include: {
+          user: true,
+        },
+        }
       },
     });
 
@@ -119,6 +125,41 @@ export class EventsService {
 
     return nearby;
   }
+
+  async createEventParticipant(dto: CreateEventParticipantDto) {
+    const { eventId, userId } = dto;
+
+    // Verifica se evento e usuário existem
+    const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!event) throw new NotFoundException('Evento não encontrado');
+    if (!user) throw new NotFoundException('Usuário não encontrado');
+
+    return this.prisma.eventParticipant.create({
+      data: {
+        eventId,
+        userId,        
+        
+      },
+    });
+  }
+
+  async findParticipantsByEvent(eventId: string) {
+    return this.prisma.eventParticipant.findMany({
+      where: { eventId },
+      include: { user: true, },
+    });
+  }
+
+  async removeEventParticipant(eventId: string, userId: string) {
+    return this.prisma.eventParticipant.delete({
+      where: {
+        eventId_userId: { eventId, userId },
+      },
+    });
+  }
+
 
   calculateEventRelevance(event: any, profile?: Profile | null): number {
     const now = new Date();

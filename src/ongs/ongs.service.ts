@@ -185,7 +185,17 @@ export class OngsService {
         events: true,
         feeds: true,
         user: true,
-        ongMember: true
+        impacts: {
+          include: {
+            user: true,
+            medias: true,
+          }
+        },
+        ongMember: {
+          include: {
+            user: true,
+          }
+        }
       },
     });
 

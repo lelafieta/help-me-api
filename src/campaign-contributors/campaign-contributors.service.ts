@@ -6,17 +6,35 @@ import { CampaignContributor } from '@prisma/client';
 
 @Injectable()
 export class CampaignContributorsService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  async create(
-    createCampaignContributorDto: CreateCampaignContributorDto,
-  ): Promise<CampaignContributor> {
-    return await this.prisma.campaignContributor.create({
+  constructor(private readonly prisma: PrismaService) { }
+async create(
+  createCampaignContributorDto: CreateCampaignContributorDto,
+): Promise<CampaignContributor> {
+  return this.prisma.$transaction(async (tx) => {
+    // 1. Cria o contribuidor
+    const contributor = await tx.campaignContributor.create({
       data: createCampaignContributorDto,
     });
-  }
 
-  async findAll(){
+    // 2. Atualiza os dados da campanha diretamente com incremento
+    await tx.campaign.update({
+      where: { id: createCampaignContributorDto.campaignId },
+      data: {
+        fundsRaised: {
+          increment: Number(createCampaignContributorDto.money),
+        },
+        numberOfContributions: {
+          increment: 1,
+        },
+      },
+    });
+
+    return contributor;
+  });
+}
+
+
+  async findAll() {
     return await this.prisma.campaignContributor.findMany({
       include: {
         user: true,
@@ -24,7 +42,7 @@ export class CampaignContributorsService {
     });
   }
 
-  async getContributorsByCampaign(camapaignId: string){
+  async getContributorsByCampaign(camapaignId: string) {
     return await this.prisma.campaignContributor.findMany({ where: { campaignId: camapaignId } });
   }
 

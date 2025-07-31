@@ -54,6 +54,8 @@ model User {
   OngMember OngMember[]
   OngJoinRequest OngJoinRequest[]
   MemberOng MemberOng[]
+  Impact Impact[]
+  EventParticipant EventParticipant[]
 }
 
 model Blog {
@@ -192,7 +194,7 @@ model Campaign {
   categoryId            String?
   description           String?
   fundraisingGoal       Float?
-  fundsRaised           Float?
+  fundsRaised           Float?                @default(0)
   imageCoverUrl         String?
   institution           String?
   location              String?
@@ -339,9 +341,23 @@ model Event {
   Profile Profile[]  
   communityId  String?
   community    Community? @relation(fields: [communityId], references: [id])
+  eventParticipants EventParticipant[]
   @@map("events")
+  
 }
 
+model EventParticipant {
+  id        String   @id @default(uuid())
+  eventId   String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId]) // impede duplicação do mesmo usuário no mesmo evento
+  @@map("event_participants")
+}
 
 model ChatRoom {
   id          String   @id @default(uuid())
@@ -455,25 +471,49 @@ model Ong {
   feeds           Feed[]
   user         User?       @relation(fields: [userId], references: [id])
   ongsDocuments   OngsDocument[]
-  Post Post[]
+  post Post[]
   ongMember OngMember[]
-
+  memberOng MemberOng[]
+  ongJoinRequest OngJoinRequest[]
+  impacts Impact[]
   @@map("ongs")
   
   
-  MemberOng MemberOng[]
-  OngJoinRequest OngJoinRequest[]
 }
+
+model Impact {
+  id        String         @id @default(uuid())
+  title     String
+  content   String
+  userId    String
+  ongId     String
+  date      DateTime?       @default(now())
+  ong       Ong            @relation(fields: [ongId], references: [id])
+  user      User           @relation(fields: [userId], references: [id])
+  medias    ImpactMedia[]
+  createdAt DateTime       @default(now())
+
+  @@map("impacts")
+}
+
+model ImpactMedia {
+  id        String   @id @default(uuid())
+  impactId  String
+  mediaUrl  String
+  mediaType String
+  impact    Impact   @relation(fields: [impactId], references: [id])
+}
+
 
 model MemberOng {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   role      String
-  userId    String
+  userId    String?
   ongId     String
 
-  user      User     @relation(fields: [userId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id])
   ong       Ong      @relation(fields: [ongId], references: [id])
 
   @@unique([userId, ongId])
