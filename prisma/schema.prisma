@@ -325,42 +325,47 @@ model CommunityMember {
 
 model Resource {
   id          String   @id @default(uuid())
-  title        String
-  type         String    // ex: "pdf", "image", "link"
-  url          String
-  uploadedAt   DateTime  @default(now())
+  title       String?
+  type        String     // "pdf", "image", "video", "link"
+  url         String
+  uploadedAt  DateTime   @default(now())
 
-  communityId  String
-  uploaderId   String
+  postId      String?
+  communityId String?
+  uploaderId  String
 
-  community    Community @relation(fields: [communityId], references: [id])
-  uploader     User      @relation(fields: [uploaderId], references: [id])
+  post        Post?       @relation(fields: [postId], references: [id])
+  community   Community?  @relation(fields: [communityId], references: [id])
+  uploader    User        @relation(fields: [uploaderId], references: [id])
+
   @@map("resources")
 }
 
 model Post {
-  id          String   @id @default(uuid())
-  title        String
-  content      String
-  imageUrl     String?
-  createdAt    DateTime  @default(now())
+  id           String      @id @default(uuid())  
+  content      String?
+  createdAt    DateTime    @default(now())
 
   authorId     String?
   communityId  String?
   ongId        String?
 
-  author       User?      @relation(fields: [authorId], references: [id])
-  community    Community? @relation(fields: [communityId], references: [id])
-  ong          Ong?       @relation(fields: [ongId], references: [id])
+  author       User?       @relation(fields: [authorId], references: [id])
+  community    Community?  @relation(fields: [communityId], references: [id])
+  ong          Ong?        @relation(fields: [ongId], references: [id])
 
   comments     Comment[]
+  resources    Resource[]  // ← relação com recursos
+
   @@map("posts")
 }
+
+
 model Comment {
-  id          String   @id @default(uuid())
+  id        String   @id @default(uuid())
   content   String
   createdAt DateTime @default(now())
-
+  
   postId    String
   userId    String
 

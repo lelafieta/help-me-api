@@ -17,6 +17,7 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { CampaignContributorsModule } from './campaign-contributors/campaign-contributors.module';
 import { ImpactsModule } from './impacts/impacts.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ImpactsModule } from './impacts/impacts.module';
     FeedsModule,
     CampaignContributorsModule,
     ImpactsModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
