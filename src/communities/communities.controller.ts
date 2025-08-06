@@ -10,6 +10,7 @@ import {
   UploadedFile,
   Request,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { CommunitiesService } from './communities.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
@@ -18,11 +19,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { AuthGuard } from '@nestjs/passport';
+import { CreateCommunityMemberDto } from './dto/create-community-member.dto';
+import { UpdateCommunityMemberRoleDto } from './dto/update-community-member-role.dto';
 
 @Controller('communities')
 @UseGuards(AuthGuard('jwt'))
 export class CommunitiesController {
-  constructor(private readonly communitiesService: CommunitiesService) {}
+  constructor(private readonly communitiesService: CommunitiesService) { }
 
   // 🟢 Criação com upload de imagem opcional
   @Post()
@@ -50,6 +53,22 @@ export class CommunitiesController {
     return this.communitiesService.findAllByUser(req.user.id);
   }
 
+  
+  @Post('/members')
+  addMember(@Body() dto: CreateCommunityMemberDto) {
+    return this.communitiesService.addMember(dto);
+  }
+
+  @Get('/members/:communityId')
+  listMembers(@Param('communityId') communityId: string) {
+    return this.communitiesService.listMembers(communityId);
+  }
+
+  @Patch('/memebers/role')
+  updateRole(@Body() dto: UpdateCommunityMemberRoleDto) {
+    return this.communitiesService.updateMemberRole(dto.userId, dto.communityId, dto.role);
+  }
+
   // 🔍 Buscar comunidade por ID
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -70,4 +89,5 @@ export class CommunitiesController {
   remove(@Param('id') id: string) {
     return this.communitiesService.remove(id);
   }
+
 }
