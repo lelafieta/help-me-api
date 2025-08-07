@@ -54,10 +54,15 @@ export class PostsController {
     return this.postsService.findAll();
   }
 
+  @Get('/community/:id/resources')
+  getPostWithResourcesByCommunityId(@Param('id') id: string) {
+    return this.postsService.getPostWithResourcesByCommunityId(id);
+  }
+
   @Get('/community/:id')
   getPostByCommunityId(@Param('id') id: string) {
     return this.postsService.getPostByCommunityId(id);
-  }  
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

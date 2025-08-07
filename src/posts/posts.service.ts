@@ -25,10 +25,11 @@ export class PostsService {
     if (resources?.length) {
       const resourceData = resources.map((file) => ({
         title: file.originalname,
-        type: this.detectType(file.mimetype), // ex: image, video, pdf
+        type: this.detectType(file.mimetype), 
         url: `/uploads/resources/${file.filename}`,
-        postId: post.id,
+        postId: post.id,      
         uploaderId,
+        communityId: post.communityId
       }));
 
       await this.prisma.resource.createMany({ data: resourceData });
@@ -58,6 +59,25 @@ export class PostsService {
       },
     });
   }
+
+  getPostWithResourcesByCommunityId(id: string) {
+  return this.prisma.post.findMany({
+    where: {
+      communityId: id,
+      resources: {
+        some: {},
+      },
+    },
+    include: {
+      resources: true,
+      author: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+}
+
 
 
   findAll() {

@@ -42,12 +42,18 @@ export class CommunitiesService {
           {
             members: {
               some: { userId },
+              
             },
           },
         ],
       },
-      include: {
-        members: true,
+      include: {        
+        members: {
+          include: {
+            user: true,
+          },
+        },
+        
         _count: {
           select: {
             members: true,

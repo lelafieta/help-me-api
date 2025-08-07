@@ -59,7 +59,7 @@ export class CommunitiesController {
     return this.communitiesService.addMember(dto);
   }
 
-  @Get('/members/:communityId')
+  @Get('/:communityId/members')
   listMembers(@Param('communityId') communityId: string) {
     return this.communitiesService.listMembers(communityId);
   }

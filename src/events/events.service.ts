@@ -51,6 +51,17 @@ export class EventsService {
     });
   }
 
+  getEventsByCommunity(communityId: string){
+    return this.prisma.event.findMany({
+      where: { communityId },
+      include: {
+        ong: true,
+        community: true,
+        user: true
+      },
+    });
+  }
+
   findAll() {
     return this.prisma.event.findMany();
   }

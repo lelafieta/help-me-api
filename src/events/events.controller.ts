@@ -76,6 +76,11 @@ export class EventsController {
     return this.eventsService.findForYouEvents(req.user.id);
   }
 
+  @Get('community/:communityId')
+  getEventsByCommunity(@Param('communityId') communityId: string) {
+    return this.eventsService.getEventsByCommunity(communityId);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.eventsService.remove(id);
