@@ -18,6 +18,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { CampaignContributorsModule } from './campaign-contributors/campaign-contributors.module';
 import { ImpactsModule } from './impacts/impacts.module';
 import { PostsModule } from './posts/posts.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { PostsModule } from './posts/posts.module';
     CampaignContributorsModule,
     ImpactsModule,
     PostsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

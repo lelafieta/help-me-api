@@ -71,6 +71,9 @@ export class PostsService {
     include: {
       resources: true,
       author: true,
+      likes: true,
+      comments: true,
+      shares: true,      
     },
     orderBy: {
       createdAt: 'desc',

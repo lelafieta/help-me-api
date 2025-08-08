@@ -59,6 +59,8 @@ model User {
   BlogComment BlogComment[]
   BlogLike BlogLike[]
   BlogShare BlogShare[]
+  Share Share[]
+  Like Like[]
 }
 
 model Blog {
@@ -239,6 +241,16 @@ model CampaignUpdate {
   @@map("campaign_updates")  
 }
 
+// all
+// active
+// cending
+// completed
+// cancelled
+// scheduled
+// paused
+// draft
+// expired
+
 model Campaign {
   id          String   @id @default(uuid())
   createdAt             DateTime              @default(now())
@@ -356,8 +368,9 @@ model Post {
 
   comments     Comment[]
   resources    Resource[]  // ← relação com recursos
-
-  @@map("posts")
+  shares Share[]
+  likes Like[]
+  @@map("posts")  
 }
 
 
@@ -372,6 +385,33 @@ model Comment {
   post      Post     @relation(fields: [postId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
   @@map("comments")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  postId    String
+  userId    String
+
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId]) // ← impede o mesmo user de curtir o mesmo post mais de uma vez
+  @@map("likes")
+}
+
+model Share {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  postId    String
+  userId    String
+
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("shares")
 }
 
 model Event {

@@ -55,9 +55,14 @@ export class EventsService {
     return this.prisma.event.findMany({
       where: { communityId },
       include: {
-        ong: true,
-        community: true,
-        user: true
+        ong: {
+          
+        },
+        community: {
+          
+        },
+        user: true,
+        eventParticipants: true
       },
     });
   }

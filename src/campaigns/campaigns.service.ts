@@ -22,7 +22,7 @@ export class CampaignsService {
 
     return this.prisma.$transaction(async (tx) => {
 
-      
+
       const createdDocuments = await Promise.all(
         documents.map((doc) =>
           tx.campaignDocument.create({
@@ -79,14 +79,14 @@ export class CampaignsService {
         },
       });
 
-      
 
-      
+
+
       return campaign;
     });
   }
 
-  createUpdateCampaign(updateCampaignDto: UpdateCampaignDto){
+  createUpdateCampaign(updateCampaignDto: UpdateCampaignDto) {
     return this.prisma.campaignUpdate.create({ data: updateCampaignDto });
   }
 
@@ -146,20 +146,32 @@ export class CampaignsService {
     });
   }
 
-  async findMyCampaignsByStatus(userId: string, status: string) {
+  async findMyCampaignsByStatus(userId: string, status?: string) {
+    const hasStatus = status && status.trim() !== '';
+    
+
     return this.prisma.campaign.findMany({
       where: {
-        userId: userId,
-        status: status,
+        userId,
+        ...(hasStatus ? { status: status.trim() } : {}),
       },
       include: {
         ong: true,
+        category: true,        
+        user: true,
+        campaignDocuments: true,
+        campaignMidias: true,
+        campaignUpdates: true,
+        campaignContributors: true,
+        campaignComments: true,
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
   }
+
+
 
 
   findOne(id: string) {
@@ -221,8 +233,8 @@ export class CampaignsService {
     return this.prisma.campaign.delete({ where: { id } });
   }
 
-  async findUrgentCampaignsSmart(userId?: string, limit = 10) {    
-    
+  async findUrgentCampaignsSmart(userId?: string, limit = 10) {
+
     if (!userId) {
       console.trace('ID não fornecido a findOne');
       throw new BadRequestException('ID da campanha é obrigatório');
@@ -247,7 +259,7 @@ export class CampaignsService {
         campaignUpdates: true,
         campaignContributors: {
           include: {
-            user: true  
+            user: true
           }
         },
         campaignComments: true,

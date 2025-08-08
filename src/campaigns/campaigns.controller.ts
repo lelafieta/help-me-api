@@ -13,6 +13,7 @@ import {
   HttpCode,
   Request,
   Req,
+  Query,
 } from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -27,7 +28,7 @@ import { CreateUpdateCampaignDto } from './dto/create-update-campaign.dto';
 @Controller('campaigns')
 @UseGuards(AuthGuard('jwt'))
 export class CampaignsController {
-  constructor(private readonly campaignsService: CampaignsService) {}
+  constructor(private readonly campaignsService: CampaignsService) { }
 
   @HttpCode(200)
   @UseInterceptors(
@@ -93,10 +94,22 @@ export class CampaignsController {
     return this.campaignsService.findUrgentCampaignsSmart(req.user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.campaignsService.findOne(id);
+  @Get('my')
+  getMyCampaignsByStatus(
+    @Req() req: { user: { id: string } },
+    @Query('status') status?: string, // parâmetro opcional
+  ) {
+    return this.campaignsService.findMyCampaignsByStatus(req.user.id, status);
   }
+
+  // @Get('/my/:status')
+  // getMyCampaignsByStatus(
+  //   @Req() req: { user: { id: string } },
+  //   @Param('status') status: string,
+  // ) {
+  //   return this.campaignsService.findMyCampaignsByStatus(req.user.id, status);
+  // }
+
 
   @Get('/category/:id')
   findCampaignByCategoryId(@Param('id') id: string) {
@@ -104,17 +117,15 @@ export class CampaignsController {
   }
 
   @Post('/updates')
-  createUpdateCampaign(@Body() createUpdateCampaignDto: CreateUpdateCampaignDto)  {
+  createUpdateCampaign(@Body() createUpdateCampaignDto: CreateUpdateCampaignDto) {
     return this.campaignsService.createUpdateCampaign(createUpdateCampaignDto);
   }
 
-  @Get('my-campaigns/:status')
-  getMyCampaignsByStatus(
-    @Req() req: { user: { id: string } },
-    @Param('status') status: string,
-  ) {
-    return this.campaignsService.findMyCampaignsByStatus(req.user.id, status);
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.campaignsService.findOne(id);
   }
+
 
   @Patch(':id')
   update(
