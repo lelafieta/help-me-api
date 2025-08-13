@@ -12,13 +12,13 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { PrismaModule } from './database/prisma.module';
 import { ProfilesModule } from './profiles/profiles.module';
-import { FeedsModule } from './feeds/feeds.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { CampaignContributorsModule } from './campaign-contributors/campaign-contributors.module';
 import { ImpactsModule } from './impacts/impacts.module';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -35,12 +35,12 @@ import { UsersModule } from './users/users.module';
     FavoritesModule,
     BlogsModule,
     PrismaModule,
-    ProfilesModule,
-    FeedsModule,
+    ProfilesModule,    
     CampaignContributorsModule,
     ImpactsModule,
     PostsModule,
     UsersModule,
+    CommentsModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

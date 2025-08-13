@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsArray, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsArray, ValidateNested, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class CreateResourceDto {
@@ -16,25 +16,27 @@ class CreateResourceDto {
 }
 
 export class CreatePostDto {
-  @IsNotEmpty()
-  @IsString()
-  content: string;
-
   @IsOptional()
   @IsString()
-  authorId?: string;
+  content?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUUID()
+  userId?: string;
+
+  @IsOptional()
+  @IsUUID()
   communityId?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUUID()
   ongId?: string;
 
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateResourceDto)
-  resources?: CreateResourceDto[];
+  @IsUUID()
+  blogId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  feedId?: string;
 }

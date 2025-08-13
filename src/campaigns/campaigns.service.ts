@@ -100,7 +100,7 @@ export class CampaignsService {
         campaignMidias: true,
         campaignUpdates: true,
         campaignContributors: true,
-        campaignComments: true,
+        comments: true,
       },
     });
   }
@@ -123,7 +123,7 @@ export class CampaignsService {
         campaignMidias: true,
         campaignUpdates: true,
         campaignContributors: true,
-        campaignComments: true,
+        comments: true,
       },
     });
   }
@@ -141,19 +141,28 @@ export class CampaignsService {
         campaignMidias: true,
         campaignUpdates: true,
         campaignContributors: true,
-        campaignComments: true,
+        comments: true,
       },
     });
   }
 
-  async findMyCampaignsByStatus(userId: string, status?: string) {
-    const hasStatus = status && status.trim() !== '';
+  async findMyCampaignsByStatus(userId: string, filters: { status?: string; query?: string; }) {
+    const { status, query, } = filters;
     
 
     return this.prisma.campaign.findMany({
       where: {
         userId,
-        ...(hasStatus ? { status: status.trim() } : {}),
+        ...(status ? { status } : {}),
+      ...(query
+        ? {
+            OR: [
+              { title: { contains: query,} },
+              { description: { contains: query,} },
+              { category: { name: { contains: query,} } }
+            ]
+          }
+        : {})
       },
       include: {
         ong: true,
@@ -163,7 +172,7 @@ export class CampaignsService {
         campaignMidias: true,
         campaignUpdates: true,
         campaignContributors: true,
-        campaignComments: true,
+        comments: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -188,7 +197,7 @@ export class CampaignsService {
             user: true
           }
         },
-        campaignComments: true,
+        comments: true,
       },
     });
   }
@@ -204,7 +213,7 @@ export class CampaignsService {
         campaignMidias: true,
         campaignUpdates: true,
         campaignContributors: true,
-        campaignComments: true,
+        comments: true,
       },
     });
   }
@@ -262,7 +271,7 @@ export class CampaignsService {
             user: true
           }
         },
-        campaignComments: true,
+        comments: true,
       },
     });
 

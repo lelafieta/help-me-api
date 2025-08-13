@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { Post } from '@prisma/client';
+import { Post, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class PostsService {
     const post = await this.prisma.post.create({
       data: {
         content: dto.content,
-        authorId: uploaderId,
+        userId: uploaderId,
         communityId: dto.communityId,
         ongId: dto.ongId,
       },
@@ -25,9 +25,9 @@ export class PostsService {
     if (resources?.length) {
       const resourceData = resources.map((file) => ({
         title: file.originalname,
-        type: this.detectType(file.mimetype), 
+        type: this.detectType(file.mimetype),
         url: `/uploads/resources/${file.filename}`,
-        postId: post.id,      
+        postId: post.id,
         uploaderId,
         communityId: post.communityId
       }));
@@ -52,7 +52,22 @@ export class PostsService {
       },
       include: {
         resources: true,
-        author: true
+        user: true,
+        likes: {
+          include: {
+            user: true
+          }
+        },
+        comments: {
+          include: {
+            user: true
+          }
+        },
+        shares: {
+          include: {
+            user: true
+          }
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -60,31 +75,192 @@ export class PostsService {
     });
   }
 
-  getPostWithResourcesByCommunityId(id: string) {
-  return this.prisma.post.findMany({
-    where: {
-      communityId: id,
-      resources: {
-        some: {},
+  findByOng(
+    ongId: string
+  ) {
+    return this.prisma.post.findMany({
+      where: {
+        ongId: ongId,
       },
-    },
-    include: {
-      resources: true,
-      author: true,
-      likes: true,
-      comments: true,
-      shares: true,      
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-}
+      include: {
+        user: true,
+        community: true,
+        ong: true,
+        resources: true,
+        views: true,
+        comments: {
+          include: {
+            user: true
+          }
+        },
+        likes: {
+          include: {
+            user: true
+          }
+        },
+        shares: {
+          include: {
+            user: true
+          }
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  findALL(
+
+  ) {
+    return this.prisma.post.findMany({
+
+      include: {
+        user: true,
+        community: true,
+        ong: true,
+        resources: true,
+        views: true,
+        comments: {
+          include: {
+            user: true
+          }
+        },
+        likes: {
+          include: {
+            user: true
+          }
+        },
+        shares: {
+          include: {
+            user: true
+          }
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+
+  findByCommunity(
+    communityId: string
+  ) {
+    return this.prisma.post.findMany({
+      where: {
+        communityId: communityId,
+      },
+      include: {
+        user: true,
+        community: true,
+        ong: true,
+        resources: true,
+        views: true,
+        comments: {
+          include: {
+            user: true
+          }
+        },
+        likes: {
+          include: {
+            user: true
+          }
+        },
+        shares: {
+          include: {
+            user: true
+          }
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+
+  async findAll() {    
+    return this.prisma.post.findMany({    
+      include: {
+        user: true,
+        community: {
+          include: {
+            members: {
+              include: {
+                user: true
+              }
+            }
+          }
+        },
+        ong: true,
+        resources: true,
+        views: true,
+        comments: {
+          include: {
+            user: true
+          }
+        },
+        likes: {
+          include: {
+            user: true
+          }
+        },
+        shares: {
+          include: {
+            user: true
+          }
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
 
 
 
-  findAll() {
-    return `This action returns all posts`;
+
+  getPostsWithResourcesByCommunity( communityId: string ) {
+
+
+    
+
+    return this.prisma.post.findMany({
+      where: {
+        communityId: communityId,
+        resources: {
+          some: {},
+        },
+      },
+      include: {
+        user: true,
+        community: true,
+        ong: true,
+        resources: true,
+        views: true,
+        comments: {
+          include: {
+            user: true
+          }
+        },
+        likes: {
+          include: {
+            user: true
+          }
+        },
+        shares: {
+          include: {
+            user: true
+          }
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+
   }
 
   findOne(id: number) {

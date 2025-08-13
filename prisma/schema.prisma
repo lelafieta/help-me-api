@@ -30,8 +30,8 @@ model User {
   userFcmTokens    UserFcmToken[]
   Campaign Campaign[]
   Ong Ong[]
-  Blog Blog[]
-  Feed Feed[]
+  Blog Blog[]  
+  
   FeedComment FeedComment[]
   CampaignContributor CampaignContributor[]
   CampaignComment CampaignComment[]
@@ -42,14 +42,14 @@ model User {
   Event Event[]
   FeedLike FeedLike[]
   FeedView FeedView[]  
-  Comment Comment[]
+  // Comment Comment[]
   Resource Resource[]
   CommunityMember CommunityMember[]
   Post Post[]
   Message Message[]
   ChatMember ChatMember[]
   Favorite Favorite[]
-  @@map("users")  
+
   
   OngMember OngMember[]
   OngJoinRequest OngJoinRequest[]
@@ -59,8 +59,12 @@ model User {
   BlogComment BlogComment[]
   BlogLike BlogLike[]
   BlogShare BlogShare[]
-  Share Share[]
-  Like Like[]
+  Share Share[] @relation("UserShare")
+  Comment Comment[] @relation("UserComments")
+  Like Like[] @relation("UserLikes")
+  @@map("users")  
+  
+  
 }
 
 model Blog {
@@ -74,13 +78,18 @@ model Blog {
   title       String?
   image       String?
   user     User?  @relation(fields: [userId], references: [id])
-  ong         Ong?      @relation(fields: [ongId], references: [id])
+  ong        Ong?      @relation(fields: [ongId], references: [id])
 
-  blogComments BlogComment[]
-  blogLikes BlogLike[]
-  blogShares BlogShare[]
+
+  views View[] @relation("BlogViews")  
+  likes Like[] @relation("BlogLikes")
+  shares Share[] @relation("BlogShares")
+  comments Comment[] @relation("BlogComments")  
+  resources Resource[]
 
   @@map("blogs")  
+  
+
   
 }
 
@@ -93,7 +102,7 @@ model BlogComment {
   blogId String
   userId String
 
-  blog   Blog @relation(fields: [blogId], references: [id])
+  // blog   Blog @relation(fields: [blogId], references: [id])
   user   User @relation(fields: [userId], references: [id])
 
   @@map("blog_comments")
@@ -106,7 +115,7 @@ model BlogLike {
   blogId String
   userId String
 
-  blog Blog @relation(fields: [blogId], references: [id])
+  // blog Blog @relation(fields: [blogId], references: [id])
   user User @relation(fields: [userId], references: [id])
 
   @@unique([blogId, userId]) // evita likes duplicados
@@ -120,7 +129,7 @@ model BlogShare {
   blogId String
   userId String
 
-  blog Blog @relation(fields: [blogId], references: [id])
+  // blog Blog @relation(fields: [blogId], references: [id])
   user User @relation(fields: [userId], references: [id])
 
   @@map("blog_shares")
@@ -136,7 +145,7 @@ model FeedComment {
   feedId  String?
   description String?
   user    User?  @relation(fields: [userId], references: [id])
-  feed    Feed? @relation(fields: [feedId], references: [id])
+  // feed    Feed? @relation(fields: [feedId], references: [id])
 
   @@map("feed_comments")
 }
@@ -150,14 +159,14 @@ model FeedLike {
   feedId  String?
   description String?
   user    User?  @relation(fields: [userId], references: [id])
-  feed    Feed? @relation(fields: [feedId], references: [id])
+  // feed    Feed? @relation(fields: [feedId], references: [id])
 
   @@map("feed_likes")
 }
 
 model FeedView {
   id              String   @id @default(uuid())
-  feed      Feed     @relation(fields: [feedId], references: [id])
+  // feed      Feed     @relation(fields: [feedId], references: [id])
   feedId    String
 
   user      User?    @relation(fields: [userId], references: [id])
@@ -180,7 +189,7 @@ model CampaignComment {
   campaignId  String?
   description String?
   user     User?  @relation(fields: [userId], references: [id])
-  campaign    Campaign? @relation(fields: [campaignId], references: [id])
+  // campaign    Campaign? @relation(fields: [campaignId], references: [id])
 
   @@map("campaign_comments")  
 }
@@ -274,17 +283,19 @@ model Campaign {
   campaignType          String?
   currency              String                @default("AOA")
   birth                 DateTime?
-  status                String?               @default("active")
-  campaignComments      CampaignComment[]
-  campaignContributors  CampaignContributor[]
-  campaignDocuments     CampaignDocument[]
-  campaignMidias        CampaignMidia[]
-  campaignUpdates       CampaignUpdate[]
+  status                String?               @default("active")  
   user                  User?              @relation(fields: [userId], references: [id])
   ong                   Ong?                  @relation(fields: [ongId], references: [id])
   category              Category?             @relation(fields: [categoryId], references: [id])
 
-  @@map("campaigns")
+  
+  comments Comment[] @relation("CampaignComments")
+  campaignContributors  CampaignContributor[]
+  campaignDocuments     CampaignDocument[]
+  campaignMidias        CampaignMidia[]
+  campaignUpdates       CampaignUpdate[]
+
+  @@map("campaigns")  
 }
 
 model Category {
@@ -318,6 +329,7 @@ model Community {
   categories  Category[]  
 
   @@map("communities")  
+  Share Share[] @relation("CommunityShares")
 }
 
 model CommunityMember {
@@ -344,13 +356,16 @@ model Resource {
 
   postId      String?
   communityId String?
+  blogId      String?
   uploaderId  String
 
   post        Post?       @relation(fields: [postId], references: [id])
   community   Community?  @relation(fields: [communityId], references: [id])
+  blog        Blog?       @relation(fields: [blogId], references: [id])
   uploader    User        @relation(fields: [uploaderId], references: [id])
 
   @@map("resources")
+  
 }
 
 model Post {
@@ -358,61 +373,62 @@ model Post {
   content      String?
   createdAt    DateTime    @default(now())
 
-  authorId     String?
+  userId     String
   communityId  String?
-  ongId        String?
+  ongId        String?  
 
-  author       User?       @relation(fields: [authorId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
   community    Community?  @relation(fields: [communityId], references: [id])
-  ong          Ong?        @relation(fields: [ongId], references: [id])
-
-  comments     Comment[]
+  ong          Ong?        @relation(fields: [ongId], references: [id])  
+  
   resources    Resource[]  // ← relação com recursos
-  shares Share[]
-  likes Like[]
+  views View[] @relation("PostViews")
+  comments Comment[] @relation("PostComments")
+  likes Like[] @relation("PostLikes")
+  shares Share[] @relation("PostShares")
   @@map("posts")  
 }
 
 
-model Comment {
-  id        String   @id @default(uuid())
-  content   String
-  createdAt DateTime @default(now())
+// model Comment {
+//   id        String   @id @default(uuid())
+//   content   String
+//   createdAt DateTime @default(now())
   
-  postId    String
-  userId    String
+//   postId    String
+//   userId    String
 
-  post      Post     @relation(fields: [postId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
-  @@map("comments")
-}
+//   post      Post     @relation(fields: [postId], references: [id])
+//   user      User     @relation(fields: [userId], references: [id])
+//   @@map("comments")
+// }
 
-model Like {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+// model Like {
+//   id        String   @id @default(uuid())
+//   createdAt DateTime @default(now())
 
-  postId    String
-  userId    String
+//   postId    String
+//   userId    String
 
-  post      Post     @relation(fields: [postId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+//   post      Post     @relation(fields: [postId], references: [id])
+//   user      User     @relation(fields: [userId], references: [id])
 
-  @@unique([postId, userId]) // ← impede o mesmo user de curtir o mesmo post mais de uma vez
-  @@map("likes")
-}
+//   @@unique([postId, userId]) // ← impede o mesmo user de curtir o mesmo post mais de uma vez
+//   @@map("likes")
+// }
 
-model Share {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
+// model Share {
+//   id        String   @id @default(uuid())
+//   createdAt DateTime @default(now())
 
-  postId    String
-  userId    String
+//   postId    String
+//   userId    String
 
-  post      Post     @relation(fields: [postId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+//   post      Post     @relation(fields: [postId], references: [id])
+//   user      User     @relation(fields: [userId], references: [id])
 
-  @@map("shares")
-}
+//   @@map("shares")
+// }
 
 model Event {
   id                String   @id @default(uuid())
@@ -434,7 +450,9 @@ model Event {
   communityId  String?
   community    Community? @relation(fields: [communityId], references: [id])
   eventParticipants EventParticipant[]
+  coments Comment[] @relation("EventComments")
   @@map("events")
+  
   
 }
 
@@ -491,6 +509,79 @@ model Message {
   @@map("messages")
 }
 
+model Comment {
+  id         String   @id @default(uuid())
+  content    String
+  userId     String
+  createdAt  DateTime @default(now())
+
+  postId     String?  
+  blogId     String?
+  feedId     String?
+  campaignId String?
+  eventId    String?
+
+  user       User    @relation("UserComments", fields: [userId], references: [id])
+  post       Post?    @relation("PostComments", fields: [postId], references: [id])
+  blog       Blog?    @relation("BlogComments", fields: [blogId], references: [id])
+  event      Event?    @relation("EventComments", fields: [eventId], references: [id])  
+  campaign   Campaign?    @relation("CampaignComments", fields: [campaignId], references: [id])
+  
+
+  @@map("comments")
+}
+
+model Like {
+  id         String   @id @default(uuid())
+  userId     String
+  createdAt  DateTime @default(now())
+
+  postId     String?
+  blogId     String?
+  feedId     String?
+
+  user       User    @relation("UserLikes", fields: [userId], references: [id])
+  post       Post?    @relation("PostLikes", fields: [postId], references: [id])
+  blog       Blog?    @relation("BlogLikes", fields: [blogId], references: [id])  
+  
+  @@map("likes")
+}
+
+model Share {
+  id         String   @id @default(uuid())
+  userId     String
+  createdAt  DateTime @default(now())
+
+  postId     String?
+  blogId     String?
+  feedId     String?
+  communityId String?
+
+  user       User    @relation("UserShare", fields: [userId], references: [id])
+  post       Post?    @relation("PostShares", fields: [postId], references: [id])
+  blog       Blog?    @relation("BlogShares", fields: [blogId], references: [id])  
+  community  Community?  @relation("CommunityShares", fields: [communityId], references: [id])
+
+
+  @@map("shares")
+}
+
+model View {
+  id         String   @id @default(uuid())
+  userId     String?
+  ipAddress  String? // opcional, para views anônimas
+  createdAt  DateTime @default(now())
+
+  postId     String?
+  blogId     String?
+  feedId     String?
+
+  post       Post?    @relation("PostViews", fields: [postId], references: [id])
+  blog       Blog?    @relation("BlogViews", fields: [blogId], references: [id])
+
+  @@map("views")
+}
+
 
 model Favorite {
   id        String   @id @default(uuid())
@@ -502,29 +593,6 @@ model Favorite {
   user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)  
 
   @@map("favorites")
-}
-
-model Feed {
-  id          String   @id @default(uuid())  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-  description String?
-  userId      String?
-  ongId       String?
-  title       String?
-  image       String?
-  views       Int?      @default(0)
-  likes       Int?      @default(0)
-  comments    Int?      @default(0)  
-  user        User?  @relation(fields: [userId], references: [id])
-  ong         Ong?      @relation(fields: [ongId], references: [id])
-
-  
-  feedComment FeedComment[]
-  feedLike FeedLike[]  
-  feedView FeedView[]
-  @@map("feeds")  
-  
 }
 
 model Notification {
@@ -563,10 +631,9 @@ model Ong {
   blogs           Blog[]
   campaigns       Campaign[]
   events          Event[]
-  feeds           Feed[]
   user         User?       @relation(fields: [userId], references: [id])
   ongsDocuments   OngsDocument[]
-  post Post[]
+  posts Post[]
   ongMember OngMember[]
   memberOng MemberOng[]
   ongJoinRequest OngJoinRequest[]
@@ -629,8 +696,6 @@ model OngJoinRequest {
   user       User?    @relation(fields: [userId], references: [id])
   ong        Ong      @relation(fields: [ongId], references: [id])
 }
-
-
 
 model OngsDocument {
   id                            String    @id @default(uuid())

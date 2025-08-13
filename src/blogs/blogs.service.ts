@@ -41,7 +41,32 @@ export class BlogsService {
   }
 
   findAll() {
-    return this.prisma.blog.findMany();
+    return this.prisma.blog.findMany(
+      {        
+        include: {
+        ong: true,        
+        likes: {
+          include: {
+            user: true
+          }
+        },
+        shares:  {
+          include: {
+            user: true
+          }
+        },
+        comments:  {
+          include: {
+            user: true
+          }
+        },
+        user: true
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      }
+    );
   }
 
   findOne(id: string) {
@@ -54,10 +79,22 @@ export class BlogsService {
         image: { not: null },
       },
       include: {
-        ong: true,
-        blogComments: true,
-        blogLikes: true,
-        blogShares: true,
+        ong: true,        
+        likes: {
+          include: {
+            user: true
+          }
+        },
+        shares:  {
+          include: {
+            user: true
+          }
+        },
+        comments:  {
+          include: {
+            user: true
+          }
+        },
         user: true
       },
       orderBy: {
@@ -94,9 +131,21 @@ export class BlogsService {
           }
         },
         user: true,
-        blogComments: true,
-        blogLikes: true,
-        blogShares: true,        
+        comments: {
+          include: {
+            user: true
+          }
+        },
+        likes: {
+          include: {
+            user: true
+          }
+        },
+        shares: {
+          include: {
+            user: true
+          }
+        },
       },
       orderBy: {
         createdAt: 'desc',

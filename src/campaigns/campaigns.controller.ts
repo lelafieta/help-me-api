@@ -97,9 +97,10 @@ export class CampaignsController {
   @Get('my')
   getMyCampaignsByStatus(
     @Req() req: { user: { id: string } },
-    @Query('status') status?: string, // parâmetro opcional
+    @Query('status') status?: string,
+    @Query('query') query?: string,
   ) {
-    return this.campaignsService.findMyCampaignsByStatus(req.user.id, status);
+    return this.campaignsService.findMyCampaignsByStatus(req.user.id,  {status, query});
   }
 
   // @Get('/my/:status')

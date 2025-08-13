@@ -183,7 +183,12 @@ export class OngsService {
       include: {
         campaigns: true,
         events: true,
-        feeds: true,
+        posts: {
+          include: {
+            user: true,
+          }
+        
+        },
         user: true,
         impacts: {
           include: {
@@ -211,14 +216,14 @@ export class OngsService {
   }
 
   calculateOngPopularity(
-    ong: Ong & { campaigns: any[]; events: any[]; feeds: any[] },
+    ong: Ong & { campaigns: any[]; events: any[]; posts: any[] },
   ): number {
     let score = 0;
 
     if (ong.isVerified) score += 2;
     if (ong.campaigns?.length > 0) score += 1;
     if (ong.events?.length > 0) score += 1;
-    if (ong.feeds?.length > 0) score += 1;
+    if (ong.posts?.length > 0) score += 1;
     if (ong.website) score += 1;
     if (ong.profileImageUrl) score += 1;
 

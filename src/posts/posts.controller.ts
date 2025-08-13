@@ -1,6 +1,5 @@
 import {
   Controller,
-
   Body,
   UploadedFiles,
   UseInterceptors,
@@ -10,7 +9,8 @@ import {
   Patch,
   UseGuards,
   Request,
-  Post
+  Post,
+  Query
 } from '@nestjs/common';
 
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -25,7 +25,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 @Controller('posts')
 @UseGuards(AuthGuard('jwt'))
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService) { }
 
   @Post()
   @UseInterceptors(
@@ -39,11 +39,11 @@ export class PostsController {
       }),
     }),
   )
-   createPost(
+  createPost(
     @Request() req: { user: { id: string } },
     @Body() dto: CreatePostDto,
     @UploadedFiles() files?: Express.Multer.File[],
-    
+
   ) {
     const userId = req.user?.id;
     return this.postsService.createPost(dto, userId, files);
@@ -54,15 +54,23 @@ export class PostsController {
     return this.postsService.findAll();
   }
 
-  @Get('/community/:id/resources')
-  getPostWithResourcesByCommunityId(@Param('id') id: string) {
-    return this.postsService.getPostWithResourcesByCommunityId(id);
+  @Get("ong/:ongId")
+  findByOng(@Param('ongId') ongId: string) {
+    return this.postsService.findByOng(ongId);
   }
 
-  @Get('/community/:id')
-  getPostByCommunityId(@Param('id') id: string) {
-    return this.postsService.getPostByCommunityId(id);
+  @Get("community/:communityId")
+  findByCommunity(@Param('communityId') communityId: string) {
+    return this.postsService.findByCommunity(communityId);
   }
+
+  @Get('/community/:id/resources')
+  getPostsWithResourcesByCommunity(    
+    @Param('id') communityId: string,
+  ) {
+    return this.postsService.getPostsWithResourcesByCommunity(communityId);
+  }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {
