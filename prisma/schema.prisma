@@ -373,7 +373,7 @@ model Post {
   content      String?
   createdAt    DateTime    @default(now())
 
-  userId     String
+  userId       String
   communityId  String?
   ongId        String?  
 
