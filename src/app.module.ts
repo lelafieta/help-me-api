@@ -19,6 +19,7 @@ import { ImpactsModule } from './impacts/impacts.module';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
 import { CommentsModule } from './comments/comments.module';
+import { LikesModule } from './likes/likes.module';
 
 @Module({
   imports: [
@@ -40,7 +41,8 @@ import { CommentsModule } from './comments/comments.module';
     ImpactsModule,
     PostsModule,
     UsersModule,
-    CommentsModule
+    CommentsModule,
+    LikesModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

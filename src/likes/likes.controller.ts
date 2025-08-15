@@ -1,15 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { UpdateLikeDto } from './dto/update-like.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { ToggleLikeDto } from './dto/toggle-like.dto';
 
 @Controller('likes')
+@UseGuards(AuthGuard('jwt'))
 export class LikesController {
-  constructor(private readonly likesService: LikesService) {}
+  constructor(private readonly likesService: LikesService) { }
 
   @Post()
   create(@Body() createLikeDto: CreateLikeDto) {
     return this.likesService.create(createLikeDto);
+  }
+
+
+  @Post('toggle')
+  toggleLike(@Body() dto: ToggleLikeDto) {
+    return this.likesService.toggleLike(dto);
   }
 
   @Get()
